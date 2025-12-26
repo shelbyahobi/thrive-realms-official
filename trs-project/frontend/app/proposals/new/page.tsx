@@ -114,8 +114,24 @@ function NewProposalContent() {
             const addr = searchParams.get('address') || '';
             setCompanyAddr(addr);
             setTitle(`Approve Execution Partner: ${addr.substring(0, 8)}...`);
-            setPurpose(`To verify the execution entity at ${addr} for DAO mandates.`);
             setCategory("Execution Entity Approval");
+
+            // Auto-Fetch Company Data
+            if (addr && provider) {
+                const reg = new ethers.Contract(CONTRACT_ADDRESSES.COMPANY_REGISTRY, CONTRACT_ABIS.CompanyRegistry, provider);
+                reg.getCompany(addr).then((c: any) => {
+                    setCompName(c.name);
+                    try {
+                        const meta = JSON.parse(c.metadataURI);
+                        setCompWebsite(meta.website || '');
+                        setCompServices(meta.description || '');
+                        setPurpose(`Approval for ${c.name} to become an official Execution Partner.`);
+                    } catch (e) {
+                        // Fallback for old format
+                        setPurpose("Approval for registered entity.");
+                    }
+                });
+            }
         } else if (typeParam === 'project') {
             setType('project');
         }

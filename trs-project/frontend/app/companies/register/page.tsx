@@ -58,8 +58,8 @@ export default function RegisterCompanyPage() {
             const tx = await companyRegistry.requestRegistration(name, metadata);
             await tx.wait();
 
-            alert("Registration Requested! The DAO will review your application.");
-            router.push('/dashboard');
+            alert("Registration Requested! Redirecting to Proposal Creation...");
+            router.push(`/proposals/new?type=company_approval&address=${account}`);
         } catch (e: any) {
             console.error(e);
             alert("Error: " + e.message);
