@@ -1,0 +1,22 @@
+{
+  "name": "trs-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "devDependencies": {
+    "@chainlink/contracts": "^1.4.0",
+    "@nomicfoundation/hardhat-ethers": "^3.1.0",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@openzeppelin/contracts": "^4.9.6",
+    "dotenv": "^17.2.1",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.1"
+  }
+}
