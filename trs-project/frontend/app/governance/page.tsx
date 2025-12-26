@@ -25,21 +25,21 @@ export default function GovernancePage() {
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'proposals' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Vote size={18} /> Proposals
+                        <Vote size={18} /> Vote (Proposals)
                     </button>
                     <button
                         onClick={() => setActiveTab('projects')}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Briefcase size={18} /> Mandates (Projects)
+                        <Briefcase size={18} /> Track (Executed)
                     </button>
                     <button
                         onClick={() => setActiveTab('treasury')}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'treasury' ? 'bg-green-600 text-white shadow-lg shadow-green-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Landmark size={18} /> Treasury
+                        <Landmark size={18} /> Audit (Treasury)
                     </button>
                 </div>
             </div>
