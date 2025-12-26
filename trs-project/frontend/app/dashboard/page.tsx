@@ -8,8 +8,8 @@ import TokenSale from '../../components/dao/TokenSale';
 import DividendDashboard from '../../components/dao/DividendDashboard';
 import TreasuryWidget from '../../components/dashboard/TreasuryWidget';
 import ActiveProposalsWidget from '../../components/dashboard/ActiveProposalsWidget';
-import EntityStatusWidget from '../../components/dashboard/EntityStatusWidget';
-import PartnerWorkstationWidget from '../../components/dashboard/PartnerWorkstationWidget';
+import ActionCenterWidget from '../../components/dashboard/ActionCenterWidget';
+import PartnerStatusWidget from '../../components/dashboard/PartnerStatusWidget';
 import { Shield, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,19 +56,21 @@ export default function Dashboard() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+                {/* 0. Action Center (Only shows if there are actions) */}
+                <div className="md:col-span-2 xl:col-span-3">
+                    <ActionCenterWidget />
+                </div>
+
                 {/* 1. Balance */}
                 <div className="glass-card p-6 border-l-4 border-blue-500">
                     <p className="text-xs text-gray-400 uppercase font-bold mb-1">Your Balance</p>
                     <p className="text-2xl font-mono text-white truncate" title={balance}>{parseFloat(balance).toLocaleString()} TRS</p>
                 </div>
 
-                {/* 1b. Entity Status (If exists) */}
-                <EntityStatusWidget />
+                {/* 2. Partner Status (Unified) */}
+                <PartnerStatusWidget />
 
-                {/* 1c. Partner Workstation (Dynamic) */}
-                <PartnerWorkstationWidget />
-
-                {/* 1d. Secure Chat Access */}
+                {/* 3. Secure Chat Access */}
                 <div className="glass-card p-6 border-l-4 border-indigo-500 flex flex-col justify-between">
                     <div>
                         <p className="text-xs text-gray-400 uppercase font-bold mb-1">Communication</p>
@@ -85,7 +87,7 @@ export default function Dashboard() {
                     </Link>
                 </div>
 
-                {/* 2. Tier */}
+                {/* 4. Tier */}
                 <div className={`glass-card p-6 border-l-4 ${tier === 'Founder' ? 'border-purple-500' : 'border-gray-500'}`}>
                     <p className="text-xs text-gray-400 uppercase font-bold mb-1">Member Tier</p>
                     <div className="flex items-center gap-2">
@@ -94,10 +96,10 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* 3. Treasury Widget */}
+                {/* 5. Treasury Widget */}
                 <TreasuryWidget />
 
-                {/* 4. Proposals Widget */}
+                {/* 6. Proposals Widget */}
                 <ActiveProposalsWidget />
             </div>
 

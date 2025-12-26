@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
 import { useWallet } from '../../hooks/useWallet';
-import { Vote } from 'lucide-react';
+import { Vote, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ActiveProposalsWidget() {
@@ -12,8 +12,25 @@ export default function ActiveProposalsWidget() {
     const [latestProposal, setLatestProposal] = useState<{ id: string, title: string } | null>(null);
 
     useEffect(() => {
+        // Try Cache First
+        const cached = sessionStorage.getItem('activeProposals');
+        if (cached) {
+            const data = JSON.parse(cached);
+            // Check if cache is fresh (< 5 mins)
+            if (Date.now() - data.timestamp < 5 * 60 * 1000) {
+                setActiveCount(data.count);
+                setLatestProposal(data.latest);
+                return;
+            }
+        }
         checkProposals();
     }, []);
+
+    const refresh = () => {
+        setLatestProposal(null);
+        sessionStorage.removeItem('activeProposals');
+        checkProposals();
+    };
 
     async function checkProposals() {
         try {
@@ -27,8 +44,9 @@ export default function ActiveProposalsWidget() {
             let events: any[] = [];
 
             // Scan last 100k blocks in chunks to avoid RPC timeouts
-            const CHUNK_SIZE = 5000;
-            const TOTAL_SEARCH = 100000;
+            // Scan last ~2.5 hours blocks in chunks to avoid RPC timeouts
+            const CHUNK_SIZE = 1500;
+            const TOTAL_SEARCH = 3000;
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
@@ -36,7 +54,7 @@ export default function ActiveProposalsWidget() {
                 try {
                     const chunk = await gov.queryFilter(filter, from, to);
                     events = [...events, ...chunk];
-                    await new Promise(r => setTimeout(r, 200)); // Throttle requests
+                    // Removed sleep to speed up
                 } catch (e) {
                     // console.warn(`Chunk failed ${from}-${to}`);
                 }
@@ -67,6 +85,14 @@ export default function ActiveProposalsWidget() {
             }
             setActiveCount(count);
             setLatestProposal(latest);
+
+            // Cache Results
+            sessionStorage.setItem('activeProposals', JSON.stringify({
+                count: count,
+                latest: latest,
+                timestamp: Date.now()
+            }));
+
         } catch (e) {
             console.warn(e);
         }
@@ -80,6 +106,9 @@ export default function ActiveProposalsWidget() {
                 </div>
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Governance</span>
             </div>
+            <button onClick={(e) => { e.preventDefault(); refresh(); }} className="absolute top-6 right-6 text-gray-600 hover:text-white transition">
+                <RefreshCw size={14} />
+            </button>
 
             <div>
                 <p className="text-4xl font-bold text-white mb-1">{activeCount}</p>

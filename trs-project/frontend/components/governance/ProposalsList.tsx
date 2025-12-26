@@ -69,8 +69,8 @@ export default function ProposalsList() {
             const filter = gov.filters.ProposalCreated();
             let events: any[] = [];
 
-            const CHUNK_SIZE = 2000;
-            const TOTAL_SEARCH = 100000;
+            const CHUNK_SIZE = 500;
+            const TOTAL_SEARCH = 500; // Search last ~25 mins only (Flash Speed)
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
@@ -78,7 +78,7 @@ export default function ProposalsList() {
                 try {
                     const chunk = await gov.queryFilter(filter, from, to);
                     events = [...events, ...chunk];
-                    await new Promise(r => setTimeout(r, 200));
+                    // Removed sleep to speed up
                 } catch (e: any) {
                     console.warn(`Error ${from}-${to}:`, e.message);
                 }
@@ -86,16 +86,19 @@ export default function ProposalsList() {
 
             if (events.length === 0) console.warn("Scan complete. No events found.");
 
-            const list: Proposal[] = [];
-            for (const event of events.reverse().slice(0, 10)) {
+            const list: Proposal[] = await Promise.all(events.reverse().slice(0, 10).map(async (event) => {
                 const args = (event as any).args;
                 const id = args[0];
                 const proposer = args[1];
                 const desc = args[8];
-                const state = await gov.state(id);
-                const votes = await gov.proposalVotes(id);
 
-                list.push({
+                // Fetch details in parallel
+                const [state, votes] = await Promise.all([
+                    gov.state(id),
+                    gov.proposalVotes(id)
+                ]);
+
+                return {
                     id: id.toString(),
                     proposer: proposer,
                     description: desc || "",
@@ -103,8 +106,8 @@ export default function ProposalsList() {
                     forVotes: formatEther(votes[1]),
                     againstVotes: formatEther(votes[0]),
                     abstainVotes: formatEther(votes[2]),
-                });
-            }
+                };
+            }));
             setProposals(list);
         } catch (e) {
             console.error("Fetch Error", e);

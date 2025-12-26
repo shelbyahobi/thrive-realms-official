@@ -33,8 +33,8 @@ export default function ProposalDetailPage() {
             const filter = gov.filters.ProposalCreated();
 
             let foundEvent = null;
-            const CHUNK_SIZE = 2000;
-            const TOTAL_SEARCH = 50000; // Search deeper for specific ID
+            const CHUNK_SIZE = 1000;
+            const TOTAL_SEARCH = 2000; // Search last ~1 hour only (Fast Load)
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
