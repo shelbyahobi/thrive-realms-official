@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Vote, Briefcase, Landmark, Info } from 'lucide-react';
+import Link from 'next/link';
 import ProposalsList from '../../components/governance/ProposalsList';
 import ProjectsList from '../../components/governance/ProjectsList';
 import TreasuryView from '../../components/governance/TreasuryView';
