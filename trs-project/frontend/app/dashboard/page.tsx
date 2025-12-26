@@ -10,6 +10,7 @@ import TreasuryWidget from '../../components/dashboard/TreasuryWidget';
 import ActiveProposalsWidget from '../../components/dashboard/ActiveProposalsWidget';
 import ActionCenterWidget from '../../components/dashboard/ActionCenterWidget';
 import PartnerStatusWidget from '../../components/dashboard/PartnerStatusWidget';
+import FoundingPlaybookWidget from '../../components/dashboard/FoundingPlaybookWidget';
 import { Shield, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
@@ -69,6 +70,9 @@ export default function Dashboard() {
 
                 {/* 2. Partner Status (Unified) */}
                 <PartnerStatusWidget />
+
+                {/* 2.5 Strategic Playbook */}
+                <FoundingPlaybookWidget />
 
                 {/* 3. Secure Chat Access */}
                 <div className="glass-card p-6 border-l-4 border-indigo-500 flex flex-col justify-between">
