@@ -1,10 +1,10 @@
 const hre = require("hardhat");
 
 async function main() {
-    // Addresses from frontend/lib/contracts.ts
-    const TOKEN_ADDR = "0xEa718B043f32b4C78616AD90375C46667ea130D3";
-    const SALE_ADDR = "0xdB7360EA5c15e8e68b6bb19d172d300fcC0Fe0a6";
-    const TIMELOCK_ADDR = "0xEE72dD156B33806169C5c23bF9588A7773c195F1";
+    // Addresses from frontend/lib/contracts.ts (Updated for Secure Deployment)
+    const TOKEN_ADDR = "0x7c95Ed07B1ef6b310380Cf546a2cffCB377ef5A0";
+    const SALE_ADDR = "0x23A6c257Ee4cBf93727F3A2F6D26DeC58dC33aF9";
+    const TIMELOCK_ADDR = "0x44e5e324B4BBe790F44891e53Eb32Cb362ab7714";
 
     const [deployer] = await hre.ethers.getSigners();
     console.log("Diagnosing with account:", deployer.address);

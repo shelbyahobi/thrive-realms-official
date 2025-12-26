@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-    const SALE_ADDR = "0xdB7360EA5c15e8e68b6bb19d172d300fcC0Fe0a6";
+    const SALE_ADDR = "0x23A6c257Ee4cBf93727F3A2F6D26DeC58dC33aF9"; // NEW SECURE ADDRESS
     const [buyer] = await hre.ethers.getSigners();
 
     console.log("Attempting purchase with account:", buyer.address);
