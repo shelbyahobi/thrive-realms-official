@@ -12,9 +12,12 @@ export default function GovernancePage() {
         <div className="container mx-auto px-4 py-12">
             <header className="mb-12 text-center">
                 <h1 className="text-4xl font-bold text-white mb-4 font-serif">Governance Hub</h1>
-                <p className="text-gray-400 max-w-2xl mx-auto">
+                <p className="text-gray-400 max-w-2xl mx-auto mb-6">
                     The command center for the Thrive Realms DAO. Vote on mandates, track funded projects, and audit the treasury.
                 </p>
+                <Link href="/governance/founding-proposals" className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 hover:text-white transition-all border border-purple-500/20 text-sm font-bold">
+                    <Info size={16} /> View Founding Governance Playbook
+                </Link>
             </header>
 
             {/* Tabs */}
