@@ -52,7 +52,7 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-12">
             <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
                 <Sparkles className="text-purple-500" />
-                Command Center
+                Command Center <span className="text-xs bg-white/10 px-2 py-1 rounded text-purple-300">v1.1</span>
             </h1>
 
             {/* Stats Overview */}
