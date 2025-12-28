@@ -8,8 +8,9 @@ module.exports = buildModule("DAO", (m) => {
     const kycRegistry = m.contract("KYCRegistry", [deployer]);
 
     // 2. Deploy Timelock (Treasury)
+    // Min Delay: 172800 (2 Days) for Mainnet | 60 (1 min) for Testnet
     const timelock = m.contract("TRSTimelock", [
-        0,
+        60, // Set to 1 min for Testnet, 172800 for Mainnet
         [],
         [],
         deployer

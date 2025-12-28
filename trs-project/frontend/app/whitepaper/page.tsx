@@ -103,8 +103,24 @@ export default function WhitepaperPage() {
                             </p>
                         </div>
 
+                        <div className="bg-emerald-900/20 p-4 rounded border border-emerald-500/20 mb-6">
+                            <h3 className="text-sm text-emerald-400 uppercase font-bold mb-2">TRS Utility — Opportunity Access & Curation</h3>
+                            <p className="text-sm text-gray-300 mb-2">
+                                TRS tokens are required to:
+                            </p>
+                            <ul className="list-disc pl-5 text-xs text-gray-400 space-y-1">
+                                <li>Access curated investment opportunities (Vault)</li>
+                                <li>Submit Opportunity Registration Proposals</li>
+                                <li>Participate in prioritization and review of opportunities</li>
+                                <li>Gain visibility and credibility within the DAO ecosystem</li>
+                            </ul>
+                            <p className="text-xs text-gray-500 mt-2">
+                                Token thresholds ensure anti-spam protection and align incentives for long-term participation.
+                            </p>
+                        </div>
+
                         <div className="flex flex-wrap gap-2">
-                            {["Governance voting", "Proposal submission", "Job eligibility", "Dividend rewards", "Ecosystem access"].map((util, i) => (
+                            {["Governance voting", "Proposal submission", "Opportunity Access", "Vault Curation", "Job eligibility", "Dividend rewards"].map((util, i) => (
                                 <span key={i} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm border border-purple-500/30">
                                     {util}
                                 </span>
@@ -172,6 +188,72 @@ export default function WhitepaperPage() {
                                     <p className="text-xs text-gray-500 italic">
                                         No external tools required. Access is automatically granted based on your on-chain Tier.
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 8. Opportunity Intelligence Vault */}
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">8. Opportunity Intelligence Vault</h2>
+                        <div className="bg-white/5 p-6 rounded-xl border border-white/5 mb-6">
+                            <p className="text-gray-300 mb-4">
+                                The Opportunity Intelligence Vault is a governance-controlled registry of vetted business opportunities submitted by DAO members and partners.
+                            </p>
+                            <h3 className="text-white font-bold mb-2">Purpose</h3>
+                            <ul className="list-disc pl-5 text-gray-400 space-y-2 mb-4">
+                                <li>A structured pipeline for future DAO investments</li>
+                                <li>A knowledge base of real-world economic opportunities</li>
+                                <li>A pre-investment filtering layer before capital deployment</li>
+                            </ul>
+                            <div className="bg-black/20 p-4 rounded border border-white/10 mb-4">
+                                <h4 className="text-emerald-400 font-bold mb-2 text-sm">Access Rules</h4>
+                                <ul className="text-xs text-gray-400 space-y-1">
+                                    <li>• <strong>Founders & Voters:</strong> Full access to all listed opportunities</li>
+                                    <li>• <strong>Members:</strong> Read-only access to approved summaries</li>
+                                    <li>• <strong>Guests:</strong> No access</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-blue-900/20 p-4 rounded border border-blue-500/20">
+                                <h4 className="text-blue-400 font-bold mb-2 text-sm">Submission Process</h4>
+                                <p className="text-xs text-gray-300 mb-2">Opportunities cannot be listed directly. Instead:</p>
+                                <ol className="list-decimal pl-5 text-xs text-gray-400 space-y-1">
+                                    <li>A DAO Member or Sponsor submits an <strong>Opportunity Registration Proposal</strong></li>
+                                    <li>The proposal is reviewed and voted on by Founders and Voters</li>
+                                    <li>Upon approval, the opportunity is listed in the Vault as a non-binding investment candidate</li>
+                                </ol>
+                                <p className="text-xs text-gray-500 italic mt-2">
+                                    Note: Listing does not imply funding approval. Funding requires a separate Investment Proposal.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 9. SME & Emerging Market Onboarding */}
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">9. SME & Emerging Market Onboarding</h2>
+                        <div className="border border-white/10 rounded-xl p-6 bg-white/5">
+                            <p className="text-gray-300 mb-4">
+                                Thrive Realm supports small and medium-sized enterprises (SMEs), particularly in emerging and developing economies, through a hybrid onboarding model.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 className="text-white font-bold mb-2">Key Principles</h4>
+                                    <ul className="list-disc pl-5 text-sm text-gray-400 space-y-2">
+                                        <li>Crypto ownership is not required for initial onboarding</li>
+                                        <li>SMEs may be sponsored by DAO Members or Founders</li>
+                                        <li>The DAO acts as a verification and capital coordination layer</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-bold mb-2">Onboarding Path</h4>
+                                    <ol className="list-decimal pl-5 text-sm text-gray-400 space-y-2">
+                                        <li>SME submits information via off-chain onboarding form</li>
+                                        <li>A DAO Sponsor submits an <strong>Opportunity Registration Proposal</strong></li>
+                                        <li>If approved, the SME becomes an eligible execution or investment candidate</li>
+                                        <li>Token participation may be introduced progressively after approval</li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
@@ -261,9 +343,9 @@ export default function WhitepaperPage() {
                         </div>
                     </section>
 
-                    {/* 11. Roadmap */}
+                    {/* 10. Roadmap */}
                     <section>
-                        <h2 className="text-2xl font-bold text-white mb-4">11. Roadmap</h2>
+                        <h2 className="text-2xl font-bold text-white mb-4">10. Roadmap</h2>
                         <div className="space-y-4">
                             <div className="bg-white/5 p-4 rounded flex gap-4 items-center">
                                 <span className="text-green-400 font-bold">Phase 1</span>
@@ -280,9 +362,9 @@ export default function WhitepaperPage() {
                         </div>
                     </section>
 
-                    {/* 12. Legal */}
+                    {/* 11. Legal */}
                     <section className="border-t border-white/10 pt-8 mt-12 mb-12">
-                        <h2 className="text-xl font-bold text-white mb-4">12. Legal Disclaimer & Risk Disclosure</h2>
+                        <h2 className="text-xl font-bold text-white mb-4">11. Legal Disclaimer & Risk Disclosure</h2>
                         <div className="bg-red-500/5 border border-red-500/20 p-6 rounded-lg text-xs text-gray-400 space-y-3">
                             <p>
                                 <strong className="text-red-400 block mb-1">No Investment Advice or Guarantee</strong>

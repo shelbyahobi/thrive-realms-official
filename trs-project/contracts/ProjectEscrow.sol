@@ -13,6 +13,7 @@ contract ProjectEscrow is Ownable {
         string description;
         bool approved;
         bool paid;
+        string reportURI; // IPFS Hash of the proof-of-work
     }
 
     // Immutable Parameters
@@ -27,6 +28,12 @@ contract ProjectEscrow is Ownable {
     Milestone[] public milestones;
     
     event MilestoneReleased(uint256 indexed index, uint256 amount);
+    event ReportSubmitted(uint256 indexed index, string reportURI);
+
+    modifier onlyExecutor() {
+        require(msg.sender == executor, "Not Executor");
+        _;
+    }
 
     constructor(
         string memory _projectId,
@@ -55,17 +62,29 @@ contract ProjectEscrow is Ownable {
                 amount: _milestoneAmounts[i],
                 description: _milestoneDescriptions[i],
                 approved: false,
-                paid: false
+                paid: false,
+                reportURI: ""
             }));
         }
         
         transferOwnership(_owner);
     }
 
+    function submitReport(uint256 index, string memory _reportURI) external onlyExecutor {
+        require(index < milestones.length, "Invalid index");
+        Milestone storage m = milestones[index];
+        require(!m.paid, "Already paid");
+        require(bytes(m.reportURI).length == 0, "Report already submitted");
+
+        m.reportURI = _reportURI;
+        emit ReportSubmitted(index, _reportURI);
+    }
+
     function releaseMilestone(uint256 index) external onlyOwner {
         require(index < milestones.length, "Invalid index");
         Milestone storage m = milestones[index];
         require(!m.paid, "Already paid");
+        require(bytes(m.reportURI).length > 0, "Rule: No Report = No Money");
         
         m.approved = true;
         m.paid = true;

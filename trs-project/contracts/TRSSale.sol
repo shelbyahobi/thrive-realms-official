@@ -81,4 +81,16 @@ contract TRSSale is ReentrancyGuard, Ownable {
 
         emit TokensPurchased(msg.sender, amount, price);
     }
+    function finalizeSale() external onlyOwner {
+        require(!saleEnded, "Already ended");
+        saleEnded = true;
+        
+        // Recover unsold tokens to Treasury
+        uint256 balance = token.balanceOf(address(this));
+        if (balance > 0) {
+            token.transfer(treasury, balance);
+        }
+        
+        emit SaleEnded(block.timestamp, getCurrentPrice());
+    }
 }
