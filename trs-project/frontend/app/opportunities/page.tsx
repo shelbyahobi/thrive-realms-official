@@ -157,7 +157,17 @@ export default function OpportunitiesPage() {
                     >
                         Get Template
                     </a>
-                    <span className="text-[10px] text-gray-600">Requires 1 Founder Sponsor</span>
+                    <span className="text-[10px] text-gray-600 mb-4">Requires 1 Founder Sponsor</span>
+
+                    {/* Disambiguation / Cross-Link */}
+                    <div className="w-full pt-4 border-t border-dashed border-gray-700 mt-4">
+                        <p className="text-[10px] text-gray-400 mb-2">
+                            Are you a <strong>Service Provider</strong> or <strong>SME Representative</strong> looking to execute work?
+                        </p>
+                        <Link href="/companies/onboard" className="text-xs text-purple-400 hover:text-purple-300 underline">
+                            Register as Execution Partner &rarr;
+                        </Link>
+                    </div>
                 </div>
             </div>
 

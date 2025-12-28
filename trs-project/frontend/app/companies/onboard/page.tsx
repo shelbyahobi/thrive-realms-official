@@ -103,6 +103,20 @@ export default function CompanyOnboardPage() {
                     {status && <p className="text-center text-sm mt-4 text-purple-300 animate-pulse">{status}</p>}
                 </div>
             </div>
+
+            {/* Disambiguation / Cross-Link */}
+            <div className="mt-8 text-center bg-white/5 border border-white/5 rounded-lg p-6">
+                <h4 className="text-white font-bold mb-2">Are you looking for funding?</h4>
+                <p className="text-sm text-gray-400 mb-4">
+                    If you have a business opportunity, project, or representative mandate that needs investment, please submit it to the Vault instead.
+                </p>
+                <button
+                    onClick={() => router.push('/opportunities')}
+                    className="text-sm text-purple-400 hover:text-purple-300 font-bold flex items-center justify-center gap-2 mx-auto"
+                >
+                    Go to Opportunity Vault &rarr;
+                </button>
+            </div>
         </div>
     );
 }
