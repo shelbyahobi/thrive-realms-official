@@ -76,7 +76,12 @@ export default function CommunityStatsWidget() {
 
                 {/* Supply */}
                 <div className="text-center border-l border-white/10">
-                    <p className="text-xl font-mono text-white mb-1 mt-1 font-bold">{stats.supply.split(',')[0]}M</p>
+                    <p className="text-xl font-mono text-white mb-1 mt-1 font-bold">
+                        {parseInt(stats.supply.replace(/,/g, '')) > 900000000
+                            ? (parseInt(stats.supply.replace(/,/g, '')) / 1000000000).toFixed(1) + 'B'
+                            : (parseInt(stats.supply.replace(/,/g, '')) / 1000000).toFixed(1) + 'M'
+                        }
+                    </p>
                     <p className="text-xs text-gray-400 uppercase font-bold">Total Supply</p>
                 </div>
             </div>

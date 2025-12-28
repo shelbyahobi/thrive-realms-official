@@ -25,6 +25,7 @@ function NewProposalContent() {
 
     // Context & Wizard State
     const [loading, setLoading] = useState(false);
+    const config = { executor, executorName, budgetTotal }; // Alias for UI access
     const [tier, setTier] = useState('');
     const [step, setStep] = useState(1);
     const [type, setType] = useState<ProposalType>('project');
@@ -658,6 +659,31 @@ ${milestones.map((m, i) => `- M${i + 1}: ${m.amount} TRS (${m.date}) - ${m.descr
                             <label className="label-text">Rationale</label>
                             <textarea className="input-field h-16" value={rationale} onChange={e => setRationale(e.target.value)} />
                         </div>
+
+                        {/* SMART CONTRACT ENFORCEMENT PREVIEW */}
+                        {type === 'project' && executor && (
+                            <div className="p-4 bg-blue-900/10 border border-blue-500/30 rounded-lg">
+                                <h4 className="text-blue-400 text-sm font-bold mb-2 flex items-center gap-2">
+                                    <ShieldCheck size={16} /> Smart Contract Enforcement
+                                </h4>
+                                <p className="text-xs text-gray-400 mb-2">
+                                    Upon approval, the <strong>TRSGovernor</strong> will automatically execute the following:
+                                </p>
+                                <div className="font-mono text-xs text-gray-300 bg-black/50 p-3 rounded border border-white/10">
+                                    <p className="text-green-400">// 1. Lock Funds</p>
+                                    <p>TRSToken.approve(ProjectRegistry, <span className="text-white">{budgetTotal} TRS</span>)</p>
+                                    <br />
+                                    <p className="text-green-400">// 2. Enforce Mandate</p>
+                                    <p>ProjectRegistry.createProject(</p>
+                                    <p className="pl-4">id: "PROJ-...",</p>
+                                    <p className="pl-4">executor: <span className="text-yellow-400">{executor}</span>,</p>
+                                    <p className="pl-4">budget: <span className="text-white">{budgetTotal} TRS</span></p>
+                                    <p>)</p>
+                                    <br />
+                                    <p className="text-gray-500">// Result: Funds are moved to a secure Escrow contract.</p>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="p-6 bg-purple-900/10 border border-purple-500/30 rounded-lg mt-4">
                             <label className="flex items-center gap-4 cursor-pointer">
