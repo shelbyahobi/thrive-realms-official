@@ -16,27 +16,36 @@ export default function CommunityStatsWidget() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (provider) loadStats();
+        loadStats();
     }, [provider]);
 
     async function loadStats() {
         try {
+            // Use wallet provider OR fallback to public RPC
+            let activeProvider = provider;
+            if (!activeProvider) {
+                const rpc = process.env.NEXT_PUBLIC_RPC_URL || "https://data-seed-prebsc-1-s1.binance.org:8545/";
+                activeProvider = new ethers.JsonRpcProvider(rpc);
+            }
+
             // Contracts
-            const registry = new ethers.Contract(CONTRACT_ADDRESSES.COMPANY_REGISTRY, CONTRACT_ABIS.CompanyRegistry, provider);
-            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
-            const governor = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, provider);
+            const registry = new ethers.Contract(CONTRACT_ADDRESSES.COMPANY_REGISTRY, CONTRACT_ABIS.CompanyRegistry, activeProvider);
+            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, activeProvider);
+            const governor = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, activeProvider);
 
             // Parallel Fetch
             const [partners, supply, proposalEvents] = await Promise.all([
                 registry.getVerifiedCompanies(),
                 token.totalSupply(),
-                governor.queryFilter(governor.filters.ProposalCreated()) // Scan all proposal events
+                governor.queryFilter(governor.filters.ProposalCreated())
             ]);
+
+            console.log("Stats Fetched:", partners.length, supply.toString(), proposalEvents.length);
 
             setStats({
                 partners: partners.length,
                 proposals: proposalEvents.length,
-                supply: parseFloat(formatEther(supply)).toLocaleString()
+                supply: formatEther(supply) // Store raw formatted string
             });
         } catch (e) {
             console.error("Failed to load community stats:", e);
@@ -77,9 +86,9 @@ export default function CommunityStatsWidget() {
                 {/* Supply */}
                 <div className="text-center border-l border-white/10">
                     <p className="text-xl font-mono text-white mb-1 mt-1 font-bold">
-                        {parseInt(stats.supply.replace(/,/g, '')) > 900000000
-                            ? (parseInt(stats.supply.replace(/,/g, '')) / 1000000000).toFixed(1) + 'B'
-                            : (parseInt(stats.supply.replace(/,/g, '')) / 1000000).toFixed(1) + 'M'
+                        {parseFloat(stats.supply) > 900000000
+                            ? (parseFloat(stats.supply) / 1000000000).toFixed(1) + 'B'
+                            : (parseFloat(stats.supply) / 1000000).toFixed(1) + 'M'
                         }
                     </p>
                     <p className="text-xs text-gray-400 uppercase font-bold">Total Supply</p>
