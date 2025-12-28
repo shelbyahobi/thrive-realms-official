@@ -13,7 +13,7 @@ export default function Navbar() {
     const links = [
         { name: 'Dashboard', href: '/dashboard' },
         { name: 'Governance', href: '/governance' },
-        { name: 'Work', href: '/work' },
+        { name: 'Jobs', href: '/jobs' },
         { name: 'Whitepaper', href: '/whitepaper' },
     ];
 

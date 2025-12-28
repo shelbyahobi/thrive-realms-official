@@ -76,8 +76,8 @@ export default function JobsPage() {
                     <p className="text-gray-400">Execute approved proposals and earn TRS.</p>
                 </div>
                 <div className="flex gap-4">
-                    <Link href="/companies/register" className="btn btn-secondary flex items-center gap-2">
-                        <Building2 size={18} /> Register Company
+                    <Link href="/companies/onboard" className="btn btn-secondary flex items-center gap-2">
+                        <Building2 size={18} /> Become a Partner
                     </Link>
                     <Link href="/jobs/new" className="btn btn-primary flex items-center gap-2">
                         <Plus size={18} /> Post Job

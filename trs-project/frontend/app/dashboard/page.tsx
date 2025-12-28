@@ -80,7 +80,25 @@ export default function Dashboard() {
                 {/* 2.5 Strategic Playbook */}
                 <FoundingPlaybookWidget />
 
-                {/* 3. Secure Chat Access */}
+                {/* 3. Opportunity Intelligence Vault (High Visibility) */}
+                <div className="glass-card p-6 border-l-4 border-emerald-500 flex flex-col justify-between relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-16 bg-emerald-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-emerald-500/20 transition"></div>
+                    <div>
+                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">Deal Flow</p>
+                        <h3 className="text-lg font-bold text-white">Opportunity Vault</h3>
+                        <p className="text-xs text-gray-500 mt-2 z-10 relative">
+                            Access vetted investment pipelines & submitted mandates.
+                        </p>
+                    </div>
+                    <Link
+                        href="/opportunities"
+                        className="mt-4 w-full py-2 rounded text-sm font-bold transition flex items-center justify-center gap-2 bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500 hover:text-white"
+                    >
+                        View Intelligence 🟢
+                    </Link>
+                </div>
+
+                {/* 4. Secure Chat Access */}
                 <div className="glass-card p-6 border-l-4 border-indigo-500 flex flex-col justify-between">
                     <div>
                         <p className="text-xs text-gray-400 uppercase font-bold mb-1">Communication</p>
