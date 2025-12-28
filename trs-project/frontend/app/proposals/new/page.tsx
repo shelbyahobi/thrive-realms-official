@@ -301,6 +301,14 @@ ${milestones.map((m, i) => `- M${i + 1}: ${m.amount} TRS (${m.date}) - ${m.descr
                 const descs = milestones.map(m => m.description);
                 const budgetWei = ethers.parseEther(budgetTotal);
 
+                // STRICT ENFORCEMENT: Executor Verification
+                if (executionModel === 'Approved Company') {
+                    const isVerified = verifiedCompanies.some(c => c.address.toLowerCase() === executor.toLowerCase());
+                    if (!isVerified) {
+                        throw new Error("Strict Execution Rule: The selected executor is NOT a Verified Partner. Registration & Approval required first.");
+                    }
+                }
+
                 const regInterface = new ethers.Interface(CONTRACT_ABIS.ProjectRegistry);
                 const projectId = "PROJ-" + Date.now().toString().slice(-6);
                 const createData = regInterface.encodeFunctionData("createProject", [

@@ -11,6 +11,7 @@ import ActiveProposalsWidget from '../../components/dashboard/ActiveProposalsWid
 import ActionCenterWidget from '../../components/dashboard/ActionCenterWidget';
 import PartnerStatusWidget from '../../components/dashboard/PartnerStatusWidget';
 import FoundingPlaybookWidget from '../../components/dashboard/FoundingPlaybookWidget';
+import CommunityStatsWidget from '../../components/dashboard/CommunityStatsWidget';
 import { Shield, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
@@ -60,6 +61,11 @@ export default function Dashboard() {
                 {/* 0. Action Center (Only shows if there are actions) */}
                 <div className="md:col-span-2 xl:col-span-3">
                     <ActionCenterWidget />
+                </div>
+
+                {/* 0.5 Community Stats */}
+                <div className="md:col-span-2 xl:col-span-3">
+                    <CommunityStatsWidget />
                 </div>
 
                 {/* 1. Balance */}
