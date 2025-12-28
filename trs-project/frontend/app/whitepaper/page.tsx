@@ -1,5 +1,5 @@
 'use client';
-import { FileText, ArrowLeft, Shield } from 'lucide-react';
+import { FileText, ArrowLeft, Shield, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function WhitepaperPage() {
@@ -230,9 +230,125 @@ export default function WhitepaperPage() {
                         </div>
                     </section>
 
-                    {/* 9. SME & Emerging Market Onboarding */}
+                    {/* 9. Opportunity & Funding Lifecycle */}
                     <section>
-                        <h2 className="text-2xl font-bold text-white mb-4">9. SME & Emerging Market Onboarding</h2>
+                        <h2 className="text-2xl font-bold text-white mb-6">9. Opportunity & Funding Lifecycle</h2>
+                        <div className="bg-white/5 border border-white/10 rounded-xl p-8 mb-8">
+                            <p className="text-gray-300 mb-8">
+                                The distinction between <strong>listing an opportunity</strong> and <strong>receiving funding</strong> is absolute.
+                                The DAO operates on a strict 6-Stage Lifecycle to ensure due diligence.
+                            </p>
+
+                            <div className="space-y-8 relative">
+                                {/* Connecting Line */}
+                                <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-purple-500/50 to-transparent hidden md:block"></div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-black border border-gray-600 flex items-center justify-center text-gray-400 font-bold shrink-0">0</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Emergence</h4>
+                                        <p className="text-gray-400 text-sm">Member identifies a raw economic opportunity. No on-chain interaction.</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-purple-900/50 border border-purple-500 text-purple-300 flex items-center justify-center font-bold shrink-0">1</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Registration Proposal</h4>
+                                        <p className="text-gray-400 text-sm">
+                                            Sponsor submits <code>OPPORTUNITY_REGISTRATION</code>.
+                                            <br /><strong>Outcome:</strong> Listing in Vault (Approved) or Archive (Rejected).
+                                            <br /><span className="text-yellow-500 text-xs">⚠️ No funds committed.</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500 text-emerald-300 flex items-center justify-center font-bold shrink-0">2</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Intelligence Vault</h4>
+                                        <p className="text-gray-400 text-sm">
+                                            Read-only registry for due diligence and strategy. 0 capital flow.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-blue-900/50 border border-blue-500 text-blue-300 flex items-center justify-center font-bold shrink-0">3</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Investment Proposal</h4>
+                                        <p className="text-gray-400 text-sm">
+                                            Founder/Sponsor requests funding for an approved Opportunity.
+                                            <br />Includes: Budget, Executor, Milestones.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-black border border-gray-600 flex items-center justify-center text-gray-400 font-bold shrink-0">4</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Timelock & Execution</h4>
+                                        <p className="text-gray-400 text-sm">
+                                            48-hour safety window before smart contract execution.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-full bg-black border border-gray-600 flex items-center justify-center text-gray-400 font-bold shrink-0">5</div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-white">Funding & Reporting</h4>
+                                        <p className="text-gray-400 text-sm">
+                                            Funds released in tranches via Milestone Escrow. Missing reports pause funding.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-yellow-900/20 border border-yellow-500/30 p-6 rounded-lg mb-12">
+                            <h4 className="text-yellow-400 font-bold flex items-center gap-2 mb-2">
+                                <Lock size={18} /> Core Principles
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-300">
+                                <div className="bg-black/30 p-3 rounded">Listing ≠ Funding</div>
+                                <div className="bg-black/30 p-3 rounded">Approval ≠ Execution</div>
+                                <div className="bg-black/30 p-3 rounded">Execution ≠ Trust</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 10. Automation Roadmap */}
+                    <section className="mb-12">
+                        <h2 className="text-2xl font-bold text-white mb-6">10. Automation Roadmap</h2>
+                        <div className="space-y-6 text-gray-300">
+                            <p>
+                                We do not automate everything on day one. We layer automation as legitimacy grows.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="glass-card p-6">
+                                    <h4 className="text-white font-bold mb-2">Layer 1: Governance (Now)</h4>
+                                    <ul className="list-disc pl-5 text-sm space-y-1">
+                                        <li>Snapshot Voting (Off-chain)</li>
+                                        <li>TRS Access Control</li>
+                                        <li>Manual Safe Execution</li>
+                                    </ul>
+                                </div>
+                                <div className="glass-card p-6 border border-purple-500/30">
+                                    <h4 className="text-purple-300 font-bold mb-2">Layer 2: Enforcement (Future)</h4>
+                                    <ul className="list-disc pl-5 text-sm space-y-1">
+                                        <li><strong>DAO Treasury Contract:</strong> On-chain fund hold.</li>
+                                        <li><strong>Timelock Contract:</strong> Enforced delays.</li>
+                                        <li><strong>Milestone Escrow:</strong> Tranche-based releases.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 11. SME & Emerging Market Onboarding */}
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">11. SME & Emerging Market Onboarding</h2>
                         <div className="border border-white/10 rounded-xl p-6 bg-white/5">
                             <p className="text-gray-300 mb-4">
                                 Thrive Realm supports small and medium-sized enterprises (SMEs), particularly in emerging and developing economies, through a hybrid onboarding model.
