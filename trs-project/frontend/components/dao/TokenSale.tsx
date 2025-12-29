@@ -31,6 +31,8 @@ export default function TokenSale() {
         } catch (e: any) {
             console.error("Price Fetch Error:", e);
             setPrice("Error");
+            // If it's a network error, maybe show it
+            if (e.message) setStatus(`Network Error: ${e.message.slice(0, 50)}...`);
         }
     }
 
