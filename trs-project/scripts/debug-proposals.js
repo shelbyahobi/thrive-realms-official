@@ -1,55 +1,41 @@
 const hre = require("hardhat");
 
 async function main() {
-    const GOVERNOR_ADDR = "0x0975b9a7D8FA0E6CaD8dB87f13AE8a56166e642E"; // From contracts.ts
-    console.log("Searching for proposals on Governor:", GOVERNOR_ADDR);
+    const GOVERNOR_ADDRESS = "0x94eeA841bb375d90f0eaD499aD4191A0F8d47C9B";
+    console.log("Debugging Proposals at:", GOVERNOR_ADDRESS);
 
-    const gov = await hre.ethers.getContractAt("TRSGovernor", GOVERNOR_ADDR);
+    const Governor = await hre.ethers.getContractFactory("TRSGovernor");
+    const gov = Governor.attach(GOVERNOR_ADDRESS);
 
-    // Get current block
+    // Fetch ProposalCreated events (Limit range)
     const currentBlock = await hre.ethers.provider.getBlockNumber();
+    const fromBlock = currentBlock - 20000;
+    const filter = gov.filters.ProposalCreated();
+    const events = await gov.queryFilter(filter, fromBlock, currentBlock);
+
+    console.log(`Found ${events.length} proposals.`);
     console.log("Current Block:", currentBlock);
 
-    // Search in chunks of 5000 to avoid timeouts/limits
-    const chunkSize = 5000;
-    const maxDepth = 200000;
+    for (const event of events) {
+        const id = event.args[0];
+        const proposer = event.args[1];
+        const desc = event.args[8];
+        const state = await gov.state(id);
+        const snapshot = await gov.proposalSnapshot(id);
+        const deadline = await gov.proposalDeadline(id);
 
-    let proposalCount = 0;
-
-    for (let i = 0; i < maxDepth; i += chunkSize) {
-        const toBlock = currentBlock - i;
-        const fromBlock = Math.max(0, toBlock - chunkSize);
-
-        console.log(`Scanning blocks ${fromBlock} -> ${toBlock}...`);
-
-        try {
-            const events = await gov.queryFilter(gov.filters.ProposalCreated(), fromBlock, toBlock);
-            if (events.length > 0) {
-                console.log(`FOUND ${events.length} PROPOSALS!`);
-                events.forEach(e => {
-                    console.log(`- ID: ${e.args[0]}`);
-                    console.log(`  Proposer: ${e.args[1]}`);
-                    console.log(`  Description: ${e.args[8].substring(0, 50)}...`);
-                });
-                proposalCount += events.length;
-            }
-        } catch (e) {
-            console.error(`Error scanning chunk: ${e.message}`);
-        }
-
-        if (fromBlock === 0) break;
-    }
-
-    if (proposalCount === 0) {
-        console.log("\nCONCLUSION: No proposals found in the last 200k blocks.");
-        console.log("Possibilities:");
-        console.log("1. Wrong Governor Address.");
-        console.log("2. Proposals were created > 1 week ago.");
-        console.log("3. No proposals have ever been created on THIS contract.");
+        console.log(`\nProposal ID: ${id.toString()}`);
+        console.log(`Proposer: ${proposer}`);
+        console.log(`State: ${state} (0=Pending, 1=Active, 2=Canceled, 3=Defeated)`);
+        console.log(`Snapshot: ${snapshot} (Current: ${currentBlock})`);
+        console.log(`Deadline: ${deadline}`);
+        console.log(`Desc: ${desc.substring(0, 50)}...`);
     }
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });

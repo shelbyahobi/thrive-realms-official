@@ -191,9 +191,9 @@ export default function ProposalsList() {
                     ) : (
                         <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
                             <span className="text-green-400 font-bold text-sm flex items-center justify-center gap-2">
-                                <Plus size={16} /> Ready to Vote
+                                <Plus size={16} /> Voting Power Active
                             </span>
-                            <p className="text-xs text-gray-500 mt-1">Select an active proposal below to cast your vote.</p>
+                            <p className="text-xs text-gray-500 mt-1">You are ready to vote on active proposals.</p>
                         </div>
                     )}
                 </div>
