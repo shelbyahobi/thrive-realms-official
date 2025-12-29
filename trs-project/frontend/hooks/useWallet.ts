@@ -14,6 +14,11 @@ export function useWallet() {
             const p = new ethers.BrowserProvider(window.ethereum);
             setProvider(p);
 
+            // Get Chain ID
+            p.getNetwork().then(network => {
+                setChainId(network.chainId.toString());
+            });
+
             // Check if already connected
             p.listAccounts().then(accounts => {
                 if (accounts.length > 0) {
@@ -44,5 +49,5 @@ export function useWallet() {
         setSigner(s);
     }
 
-    return { account, provider, signer, connect };
+    return { account, provider, signer, connect, chainId };
 }
