@@ -6,7 +6,7 @@ import { useWallet } from '../../hooks/useWallet';
 import { getReadProvider } from '../../lib/providers'; // New import
 
 export default function TokenSale() {
-    const { signer, provider, account, chainId } = useWallet();
+    const { signer, provider, account, chainId, switchNetwork } = useWallet();
     const [buyAmount, setBuyAmount] = useState('');
     const [price, setPrice] = useState('0');
     const [status, setStatus] = useState('');

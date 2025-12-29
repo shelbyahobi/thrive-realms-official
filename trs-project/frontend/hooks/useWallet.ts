@@ -49,5 +49,40 @@ export function useWallet() {
         setSigner(s);
     }
 
-    return { account, provider, signer, connect, chainId };
+    async function switchNetwork() {
+        if (!window.ethereum) return;
+        const chainIdHex = '0x61'; // 97 in hex
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: chainIdHex }],
+            });
+        } catch (switchError: any) {
+            // This error code monitoring is standard for "Chain not added"
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [
+                            {
+                                chainId: chainIdHex,
+                                chainName: 'BSC Testnet',
+                                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                                blockExplorerUrls: ['https://testnet.bscscan.com/'],
+                                nativeCurrency: {
+                                    name: 'BNB',
+                                    symbol: 'tBNB',
+                                    decimals: 18,
+                                },
+                            },
+                        ],
+                    });
+                } catch (addError) {
+                    console.error(addError);
+                }
+            }
+        }
+    }
+
+    return { account, provider, signer, connect, chainId, switchNetwork };
 }
