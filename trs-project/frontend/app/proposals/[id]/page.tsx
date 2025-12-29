@@ -281,8 +281,11 @@ export default function ProposalDetailPage() {
                     <div className="glass-card p-6 border-l-4 border-blue-500">
                         <h3 className="font-bold mb-4">Cast Your Vote</h3>
 
-                        {Number(votingPower) > 0 ? (
+                        {Number(snapshotPower) > 0 ? (
                             <div className="space-y-2">
+                                <p className="text-xs text-green-400 mb-2 font-mono">
+                                    Eligible Voting Power: {Number(snapshotPower).toLocaleString()} TRS
+                                </p>
                                 <button onClick={() => castVote(1)} disabled={voting} className="btn w-full bg-green-900/40 hover:bg-green-800/60 text-green-400 border border-green-500/30 py-3 flex items-center justify-center gap-2">
                                     <CheckCircle size={18} /> Vote For
                                 </button>
@@ -296,8 +299,30 @@ export default function ProposalDetailPage() {
                         ) : (
                             <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
                                 <div className="flex items-center gap-2 text-yellow-500 font-bold mb-2">
-                                    <AlertTriangle size={18} /> No Voting Power
+                                    <AlertTriangle size={18} /> Ineligible to Vote
                                 </div>
+                                <p className="text-gray-400 text-sm mb-4">
+                                    {Number(votingPower) > 0 ? (
+                                        <span>
+                                            You currently have <strong>{Number(votingPower).toLocaleString()} Voting Power</strong>, BUT you had <strong>0 Power</strong> at the time this proposal was created (Snapshot Block #{proposal.snapshot}).
+                                            <br/><br/>
+                                            This means you acquired tokens or delegated <em>after</em> the proposal started. You will be able to vote on <strong>future</strong> proposals.
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            You have 0 Voting Power. You must <strong>Delegate</strong> tokens to yourself to activate power.
+                                        </span>
+                                    )}
+                                </p>
+                                {Number(votingPower) === 0 && (
+                                    <button 
+                                        onClick={delegate} 
+                                        className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
+                                    >
+                                        Activate Voting Power
+                                    </button>
+                                )}
+                            </div>
                                 <p className="text-gray-400 text-sm mb-4">
                                     You have tokens properly, but you must <strong>Delegate</strong> them to yourself to activate voting power.
                                     <br /><br />
@@ -310,10 +335,10 @@ export default function ProposalDetailPage() {
                                     Activate Voting Power
                                 </button>
                             </div>
-                        )}
-                    </div>
                 )}
             </div>
+                )}
         </div>
+        </div >
     );
 }
