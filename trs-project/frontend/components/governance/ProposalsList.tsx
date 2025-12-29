@@ -25,6 +25,7 @@ export default function ProposalsList() {
     const [proposals, setProposals] = useState<Proposal[]>([]);
     const [loading, setLoading] = useState(false);
     const [votingPower, setVotingPower] = useState('0');
+    const [delegatedTo, setDelegatedTo] = useState<string>(ethers.ZeroAddress);
     const [filter, setFilter] = useState<'all' | 'mandates' | 'approvals'>('all');
 
     useEffect(() => {
@@ -38,13 +39,19 @@ export default function ProposalsList() {
         if (!account || !provider) return;
         try {
             const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
-            const votes = await token.getVotes(account);
+            // Fetch both votes and delegation status
+            const [votes, currentDelegate] = await Promise.all([
+                token.getVotes(account),
+                token.delegates(account)
+            ]);
             setVotingPower(formatEther(votes));
+            setDelegatedTo(currentDelegate);
         } catch (e) { console.error(e); }
     }
 
     async function delegate() {
         if (!signer) return;
+        setLoading(true);
         try {
             const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, signer);
             const tx = await token.delegate(account);
@@ -54,6 +61,8 @@ export default function ProposalsList() {
         } catch (e: any) {
             console.error(e);
             alert("Delegation Failed: " + e.message);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -69,8 +78,8 @@ export default function ProposalsList() {
             const filter = gov.filters.ProposalCreated();
             let events: any[] = [];
 
-            const CHUNK_SIZE = 500;
-            const TOTAL_SEARCH = 500; // Search last ~25 mins only (Flash Speed)
+            const CHUNK_SIZE = 2000; // Increased chunk size for faster heavy scan
+            const TOTAL_SEARCH = 50000; // ~40 hours history (Search much deeper to find rejected proposals)
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
@@ -78,7 +87,6 @@ export default function ProposalsList() {
                 try {
                     const chunk = await gov.queryFilter(filter, from, to);
                     events = [...events, ...chunk];
-                    // Removed sleep to speed up
                 } catch (e: any) {
                     console.warn(`Error ${from}-${to}:`, e.message);
                 }
@@ -140,23 +148,58 @@ export default function ProposalsList() {
                 </div>
             </div>
 
-            {/* Delegation Warning */}
-            {parseFloat(votingPower) === 0 && (
-                <div className="mb-8 p-4 bg-yellow-900/20 border border-yellow-500/20 rounded-lg flex justify-between items-center animate-pulse">
-                    <div className="flex items-center gap-3 text-yellow-500">
-                        <AlertTriangle size={24} />
-                        <div>
-                            <h3 className="font-bold">Voting Power Inactive</h3>
-                            <p className="text-sm">You have TRS but haven't delegated voting power to yourself yet.</p>
+            {/* Governance Stats Widget */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {/* Power Card */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 p-6 shadow-2xl">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <Vote size={100} className="text-white" />
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-purple-300 text-xs font-bold uppercase tracking-widest mb-2">Your Governance Power</h3>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-extrabold text-white">{Number(votingPower).toLocaleString()}</span>
+                            <span className="text-sm font-bold text-gray-400">VP</span>
+                        </div>
+                        <div className="mt-4 flex items-center gap-3">
+                            <div className={`h-2.5 w-2.5 rounded-full ${delegatedTo !== ethers.ZeroAddress ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`} />
+                            <span className="text-sm text-gray-300">
+                                {delegatedTo === ethers.ZeroAddress
+                                    ? "Voting Power Inactive (Delegation Required)"
+                                    : delegatedTo.toLowerCase() === account?.toLowerCase()
+                                        ? "Self-Delegated (Active)"
+                                        : `Delegated to ${delegatedTo.slice(0, 6)}...`}
+                            </span>
                         </div>
                     </div>
-                    <button onClick={delegate} disabled={loading} className="px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
-                        {loading ? 'Delegating...' : 'Activate Voting Power'}
-                    </button>
                 </div>
-            )}
 
-            {loading && <div className="text-center py-12"><Loader2 className="animate-spin mx-auto text-purple-500" /></div>}
+                {/* Action Card */}
+                <div className="relative rounded-2xl bg-white/5 border border-white/10 p-6 flex flex-col justify-center gap-4">
+                    <h3 className="text-gray-200 text-sm font-bold uppercase tracking-wider">Quick Actions</h3>
+                    {parseFloat(votingPower) === 0 || delegatedTo === ethers.ZeroAddress ? (
+                        <button
+                            onClick={delegate}
+                            disabled={loading}
+                            className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-600 to-yellow-500 px-8 py-3 font-bold text-black transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-yellow-500/20"
+                        >
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                {loading ? <Loader2 className="animate-spin" /> : <AlertTriangle size={18} />}
+                                {loading ? 'Processing...' : 'Activate Voting Power'}
+                            </span>
+                        </button>
+                    ) : (
+                        <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
+                            <span className="text-green-400 font-bold text-sm flex items-center justify-center gap-2">
+                                <Plus size={16} /> Ready to Vote
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">Select an active proposal below to cast your vote.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {loading && <div className="text-center py-12"><Loader2 className="animate-spin mx-auto text-purple-500" /> <span className="text-xs text-gray-500 mt-2 block">Scanning blockchain history...</span></div>}
 
             <div className="space-y-4">
                 {filteredProposals.map(p => {
