@@ -63,6 +63,82 @@ export default function WhitepaperPage() {
                         </div>
                     </section>
 
+                    {/* 0.5 Phase 0 Activation */}
+                    <section className="border-b border-white/10 pb-12">
+                        <h2 className="text-2xl font-bold text-white mb-6">Phase 0 — Governance Activation (Non-Custodial)</h2>
+                        <div className="bg-gradient-to-r from-gray-900 to-black border border-gray-700/50 rounded-xl p-8 space-y-8">
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                                <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg">
+                                    <span className="block text-green-400 font-bold mb-1">Status</span>
+                                    <span className="text-white">Live</span>
+                                </div>
+                                <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg">
+                                    <span className="block text-blue-400 font-bold mb-1">Scope</span>
+                                    <span className="text-white">Governance Validation Only</span>
+                                </div>
+                                <div className="bg-purple-900/20 border border-purple-500/30 p-4 rounded-lg">
+                                    <span className="block text-purple-400 font-bold mb-1">Capital Risk</span>
+                                    <span className="text-white">Zero (Non-Custodial)</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-white">Objective</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Phase 0 establishes and validates the Thrive Realm governance system in a non-custodial, non-financial environment.
+                                    The purpose is to prove that proposal submission, voting, quorum enforcement, and decision finality operate correctly before any capital deployment is enabled.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 className="text-green-400 font-bold mb-3 border-b border-green-500/30 pb-2">What Is Enabled</h4>
+                                    <ul className="space-y-2 text-gray-300 text-sm list-disc pl-5">
+                                        <li>Token-weighted governance using TRS</li>
+                                        <li>Proposal submission by Founder Tier wallets</li>
+                                        <li>Transparent voting and result verification</li>
+                                        <li>Entity (Execution Partner) registration without funding</li>
+                                        <li>Opportunity registration without capital commitment</li>
+                                        <li>Public visibility into governance activity</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-red-400 font-bold mb-3 border-b border-red-500/30 pb-2">What Is Explicitly Disabled</h4>
+                                    <ul className="space-y-2 text-gray-400 text-sm list-disc pl-5">
+                                        <li>Automatic fund execution</li>
+                                        <li>Treasury withdrawals</li>
+                                        <li>Project funding</li>
+                                        <li>Milestone escrows</li>
+                                        <li>Revenue distribution</li>
+                                        <li>Any on-chain capital movement</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="bg-yellow-900/10 border border-yellow-500/20 p-6 rounded-lg">
+                                <h4 className="text-yellow-400 font-bold mb-2">Treasury Safeguards</h4>
+                                <ul className="text-sm text-gray-400 space-y-1 list-disc pl-5">
+                                    <li>All DAO funds remain secured in multisignature wallets during Phase 0.</li>
+                                    <li>No smart contract has authority to move funds.</li>
+                                    <li>No proposal can trigger execution.</li>
+                                    <li>All treasury addresses are publicly disclosed.</li>
+                                </ul>
+                            </div>
+
+                            <div className="border-t border-gray-800 pt-6">
+                                <h4 className="text-white font-bold mb-2">Transition Criteria to Phase 1</h4>
+                                <p className="text-sm text-gray-400 mb-4">The DAO may transition to Phase 1 only after:</p>
+                                <ul className="text-sm text-gray-500 space-y-1 list-disc pl-5">
+                                    <li>Governance behavior is stable.</li>
+                                    <li>Proposal standards are established.</li>
+                                    <li>Execution contracts are audited.</li>
+                                    <li><strong className="text-white">A separate vote explicitly enables funding functionality.</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
                     {/* 1. About */}
                     <section>
                         <h2 className="text-2xl font-bold text-white mb-4">1. About Thrive Realm</h2>
@@ -213,6 +289,47 @@ export default function WhitepaperPage() {
                                     <li>• Access job board</li>
                                     <li>• Apply for approved jobs</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 6. Governance System */}
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">6. Governance System</h2>
+                        <div className="space-y-8">
+                            {/* Proposal Lifecycle */}
+                            <div className="border border-white/10 rounded-xl p-6 bg-white/5">
+                                <h3 className="text-xl font-bold text-white mb-4">Proposal Lifecycle</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                                        <div>
+                                            <h4 className="text-white font-bold">Submission</h4>
+                                            <p className="text-sm text-gray-400">Founders submit proposals. Must include: Budget breakdown, Execution milestones, and detailed operational plan.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                                        <div>
+                                            <h4 className="text-white font-bold">Active Vote</h4>
+                                            <p className="text-sm text-gray-400">7-day voting window. Token-weighted voting. Quorum required for validity.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-green-900 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                                        <div>
+                                            <h4 className="text-white font-bold">Timelock & Execution</h4>
+                                            <p className="text-sm text-gray-400">Successful proposals enter a 2-day timelock before execution to prevent flash-loan attacks.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center text-xs font-bold shrink-0">4</div>
+                                        <div>
+                                            <h4 className="text-white font-bold">Reporting & Review</h4>
+                                            <p className="text-sm text-gray-400">Executors must report progress on-chain. Failure to report pauses future funding.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -422,46 +539,7 @@ export default function WhitepaperPage() {
                         </div>
                     </section>
 
-                    {/* 6. Governance System */}
-                    <section>
-                        <h2 className="text-2xl font-bold text-white mb-4">6. Governance System</h2>
-                        <div className="space-y-8">
-                            {/* Proposal Lifecycle */}
-                            <div className="border border-white/10 rounded-xl p-6 bg-white/5">
-                                <h3 className="text-xl font-bold text-white mb-4">Proposal Lifecycle</h3>
-                                <div className="space-y-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                                        <div>
-                                            <h4 className="text-white font-bold">Submission</h4>
-                                            <p className="text-sm text-gray-400">Founders submit proposals. Must include: Budget breakdown, Execution milestones, and detailed operational plan.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                                        <div>
-                                            <h4 className="text-white font-bold">Active Vote</h4>
-                                            <p className="text-sm text-gray-400">7-day voting window. Token-weighted voting. Quorum required for validity.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-green-900 flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                                        <div>
-                                            <h4 className="text-white font-bold">Timelock & Execution</h4>
-                                            <p className="text-sm text-gray-400">Successful proposals enter a 2-day timelock before execution to prevent flash-loan attacks.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center text-xs font-bold shrink-0">4</div>
-                                        <div>
-                                            <h4 className="text-white font-bold">Reporting & Review</h4>
-                                            <p className="text-sm text-gray-400">Executors must report progress on-chain. Failure to report pauses future funding.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+
 
                     {/* 7-10. Systems Overview */}
                     <section className="space-y-8">
