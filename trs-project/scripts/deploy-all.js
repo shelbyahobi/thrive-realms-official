@@ -88,26 +88,33 @@ async function main() {
     // Grant Executor Role to 'Zero Address' (Open Execution) or Deployer for testing
     // Keeping deployer as executor for now to make scripts easy
 
-    // 7. Fund the Sale Contract
+    // 10. Fund the Sale Contract
     // Transfer 100 Million TRS to Sale contract for the public round
     const saleAmount = hre.ethers.parseEther("100000000"); // 100M
     await (await token.transfer(sale.target, saleAmount)).wait();
     console.log("Transferred 100M TRS to Sale Limit");
 
-    // 8. Start the Sale
+    // 11. Start the Sale
     await (await sale.startSale()).wait();
     console.log("Sale master switch turned ON");
 
-    // 9. Register Seed Project & Verify Deployer (Transparency Hook)
-    // 9a. Verify Deployer
+    // 12. Register Seed Project & Verify Deployer (Transparency Hook)
+    // 12a. Verify Deployer
     await (await registry.setVerified(deployer.address, true)).wait();
     console.log("Verified Deployer as Executor");
 
-    // 9b. Register the Seed Escrow
+    // 12b. Register the Seed Escrow
     await (await registry.registerProject(seedEscrow.target, "Genesis Agri-Tech")).wait();
     console.log("Registered Seed Project in ExecutionRegistry");
 
-    // 9. Transfer Remaining Supply to Timelock (Treasury)
+    // --- 13. Opportunity Registry (Intelligence Vault) ---
+    console.log("Deploying OpportunityRegistry...");
+    const OpportunityRegistry = await hre.ethers.getContractFactory("OpportunityRegistry");
+    const vault = await OpportunityRegistry.deploy();
+    await vault.waitForDeployment();
+    console.log(`OpportunityRegistry deployed to: ${vault.target}`);
+
+    // 14. Transfer Remaining Supply to Timelock (Treasury)
     // The rest (900M) goes to the secure Treasury
     const remainingSupply = await token.balanceOf(deployer.address);
     if (remainingSupply > 0) {
@@ -115,9 +122,8 @@ async function main() {
         console.log(`Transferred remaining ${hre.ethers.formatEther(remainingSupply)} TRS to Timelock`);
     }
 
-    // 10. Grant Roles (Simplified)
-    await (await timelock.grantRole(PROPOSER_ROLE, governor.target)).wait();
-    console.log("Granted Proposer Role to Governor");
+    // 15. Check Timelock Balance
+    // console.log("Timelock Balance:", await token.balanceOf(timelock.target));
 
     console.log("\n--- DEPLOYMENT COMPLETE ---");
     console.log("Update frontend/lib/contracts.ts with these:");
@@ -126,7 +132,11 @@ async function main() {
         TIMELOCK: timelock.target,
         GOVERNOR: governor.target,
         SALE: sale.target,
-        REGISTRY: registry.target
+        REGISTRY: registry.target,
+        VAULT: vault.target,
+        DIVIDEND: dividendVault.target,
+        SPLITTER: founderSplitter.target,
+        SEED: seedEscrow.target
     });
 }
 

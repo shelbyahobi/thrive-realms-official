@@ -1,18 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, CheckCircle, Briefcase, MapPin, DollarSign } from 'lucide-react';
+import { Send, CheckCircle, Briefcase, MapPin, DollarSign, Loader2 } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { ethers } from 'ethers';
+import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '@/lib/contracts';
 
 export default function OpportunityForm() {
+    const { signer } = useWallet();
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Form State
+    const [name, setName] = useState('');
+    const [country, setCountry] = useState('');
+    const [funding, setFunding] = useState('');
+    const [contact, setContact] = useState('');
+    const [video, setVideo] = useState('');
+    const [summary, setSummary] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!signer) {
+            alert("Please connect your wallet first!");
+            return;
+        }
+
         setStatus('submitting');
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            const vault = new ethers.Contract(
+                CONTRACT_ADDRESSES.VAULT,
+                CONTRACT_ABIS.OpportunityRegistry,
+                signer
+            );
+
+            // submitOpportunity(name, country, fundingAsk, contactInfo, ipfsHash)
+            // Using JSON for ipfsHash field to pack description + video
+            const metadata = JSON.stringify({ summary, video });
+
+            const tx = await vault.submitOpportunity(name, country, funding, contact, metadata);
+            await tx.wait();
+
             setStatus('success');
-        }, 1500);
+            // Reset form
+            setName(''); setCountry(''); setFunding(''); setContact(''); setVideo(''); setSummary('');
+        } catch (error) {
+            console.error(error);
+            alert("Submission failed. See console.");
+            setStatus('idle');
+        }
     };
 
     if (status === 'success') {
@@ -55,6 +91,8 @@ export default function OpportunityForm() {
                     <input
                         required
                         type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         placeholder="e.g. Lagos Solar Agri-Co"
                         className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50 transition"
                     />
@@ -68,6 +106,8 @@ export default function OpportunityForm() {
                         <input
                             required
                             type="text"
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
                             placeholder="e.g. Nigeria"
                             className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50 transition"
                         />
@@ -79,6 +119,8 @@ export default function OpportunityForm() {
                         <input
                             required
                             type="text"
+                            value={funding}
+                            onChange={(e) => setFunding(e.target.value)}
                             placeholder="e.g. $5,000"
                             className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50 transition"
                         />
@@ -92,6 +134,8 @@ export default function OpportunityForm() {
                     <input
                         required
                         type="tel"
+                        value={contact}
+                        onChange={(e) => setContact(e.target.value)}
                         placeholder="+234..."
                         className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/50 transition"
                     />

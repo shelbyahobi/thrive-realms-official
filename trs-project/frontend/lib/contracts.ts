@@ -2,27 +2,26 @@ import TRSTokenArtifact from '../app/abi/TRSToken.json';
 import TRSSaleArtifact from '../app/abi/TRSSale.json';
 import TRSGovernorArtifact from '../app/abi/TRSGovernor.json';
 import DividendVaultArtifact from '../app/abi/DividendVault.json';
-import ProjectRegistryArtifact from '../app/abi/ProjectRegistry.json';
+import ProjectRegistryArtifact from '../app/abi/ExecutionRegistry.json'; // Aliased for legacy compat, or use ExecutionRegistry export
+import OpportunityRegistryArtifact from '../app/abi/OpportunityRegistry.json';
 import ProjectEscrowArtifact from '../app/abi/ProjectEscrow.json';
-import CompanyRegistryArtifact from '../app/abi/CompanyRegistry.json'; // New
-import JobRegistryArtifact from '../app/abi/JobRegistry.json'; // New
-import ExecutionRegistryArtifact from '../app/abi/ExecutionRegistry.json';
 
 // Deployed on BSC Testnet (Transparency Hooks Enabled)
 export const CONTRACT_ADDRESSES = {
     // Core Governance
-    TOKEN: "0xDd719fDe6f093b58242fa58E1207B57A3FEd714D",
-    TIMELOCK: "0xeccf3fCbA5e11b7AaaC0340317c95305695dc02d",
-    GOVERNOR: "0x99f7533591657be105636C82CdD8249549381d5D",
+    TOKEN: "0xF4B88C28852D7332AdF4939C1082e027cFA1CF29",
+    TIMELOCK: "0x78A7ad1625F565A33d9e58bB63bF19769E7591c3",
+    GOVERNOR: "0xA4aDb8bF661806d00Ad5F23662f86D7796f325BD",
 
     // Functional
-    SALE: "0xBd0D77CD1A020a105bD9F0d12d44da229f09000B",
-    PROJECT_REGISTRY: "0x1b2e349A06191CF3c0dA1850B94C78894E27d705", // ExecutionRegistry
+    SALE: "0x2452065278a34Dc98F64Cd459F680B6C1458DD27",
+    PROJECT_REGISTRY: "0x7cC186dd99F2021C69C8EF390dFAFa7aD4c4e999", // ExecutionRegistry
+    VAULT: "0x1dE8CFf01bacAFF8145c2E1907A4239224E4E493",       // OpportunityRegistry (Intelligence Vault)
 
     // 5-Wallet Structure
-    DIVIDEND_VAULT: "0x4643724F003b0B9aFE5E9e056A345968842EC81A",
-    FOUNDER_SPLITTER: "0xf15B9072447B7882af99eE618ca554A605B45f54",
-    SEED_ESCROW: "0x89C735f6A8D195AA3293AA37aA2B6667a17c78Be",
+    DIVIDEND_VAULT: "0x886bE8509894e2563a7463eFCb4766a516cb7d2B",
+    FOUNDER_SPLITTER: "0x6BEda4683e206e1b62958ed1Ffab663B374bAb5C",
+    SEED_ESCROW: "0xb1C65Ef73145CE592B117F25872e9798E4Ec8014",
 
     // Legacy / Placeholders
     USDT: "0x0000000000000000000000000000000000000000"
@@ -33,9 +32,7 @@ export const CONTRACT_ABIS = {
     TRSSale: TRSSaleArtifact.abi,
     TRSGovernor: TRSGovernorArtifact.abi,
     DividendVault: DividendVaultArtifact.abi,
-    ProjectRegistry: ProjectRegistryArtifact.abi,
-    ProjectEscrow: ProjectEscrowArtifact.abi,
-    CompanyRegistry: CompanyRegistryArtifact.abi,
-    JobRegistry: JobRegistryArtifact.abi,
-    ExecutionRegistry: ExecutionRegistryArtifact.abi
+    ExecutionRegistry: ProjectRegistryArtifact.abi, // Using ExecutionRegistry ABI
+    OpportunityRegistry: OpportunityRegistryArtifact.abi,
+    ProjectEscrow: ProjectEscrowArtifact.abi
 };
