@@ -4,7 +4,7 @@ import { ethers, formatEther } from 'ethers';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
 import { useWallet } from '../../hooks/useWallet';
 import Link from 'next/link';
-import { Plus, Loader2, AlertTriangle } from 'lucide-react';
+import { Plus, Loader2, AlertTriangle, Vote } from 'lucide-react';
 
 interface Proposal {
     id: string;
