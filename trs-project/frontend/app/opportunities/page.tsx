@@ -144,6 +144,19 @@ export default function OpportunitiesPage() {
                 </div>
             </div>
 
+            {/* Navigation to Intelligence Vault */}
+            <div className="mb-10 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 p-6 rounded-xl flex items-center justify-between">
+                <div>
+                    <h3 className="text-xl font-bold text-white mb-1">Looking for the Intelligence Vault?</h3>
+                    <p className="text-gray-400 text-sm">
+                        View, rate, and audit all submitted opportunities in the transparency registry.
+                    </p>
+                </div>
+                <Link href="/vault" className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2 transition">
+                    Enter Vault <Globe size={16} />
+                </Link>
+            </div>
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
 
