@@ -4,7 +4,7 @@ import { ethers, formatEther } from 'ethers';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '@/lib/contracts';
 import { useWallet } from '@/hooks/useWallet';
 import { Star, MessageSquare, MapPin, DollarSign, User, ExternalLink, Loader2, X } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
+// Navbar is in layout.tsx
 
 interface Opportunity {
     id: number;
@@ -102,7 +102,6 @@ export default function VaultPage() {
 
     return (
         <main className="min-h-screen bg-black text-white">
-            <Navbar />
             <div className="container mx-auto px-4 py-24">
                 <header className="mb-12 text-center">
                     <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-600 mb-4">

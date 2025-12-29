@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ethers, formatEther } from 'ethers';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../../lib/contracts';
 import { useWallet } from '../../../hooks/useWallet';
-import { CheckCircle, XCircle, MinusCircle, Loader2, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, MinusCircle, Loader2, Clock, AlertTriangle } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 export default function ProposalDetailPage() {
@@ -13,10 +13,35 @@ export default function ProposalDetailPage() {
     const [proposal, setProposal] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [voting, setVoting] = useState(false);
+    const [votingPower, setVotingPower] = useState('0');
 
     useEffect(() => {
         if (provider && id) fetchProposalDetails();
-    }, [provider, id]);
+        if (account && provider) fetchVotingPower();
+    }, [provider, id, account]);
+
+    async function fetchVotingPower() {
+        if (!account || !provider) return;
+        try {
+            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
+            const votes = await token.getVotes(account);
+            setVotingPower(formatEther(votes));
+        } catch (e) { console.error(e); }
+    }
+
+    async function delegate() {
+        if (!signer) return;
+        try {
+            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, signer);
+            const tx = await token.delegate(account);
+            await tx.wait();
+            alert("Voting Power Activated! (Note: You still can't vote on OLD proposals, only new ones)");
+            fetchVotingPower();
+        } catch (e: any) {
+            console.error(e);
+            alert("Delegation Failed: " + e.message);
+        }
+    }
 
     async function fetchProposalDetails() {
         if (!id) return;
@@ -239,17 +264,37 @@ export default function ProposalDetailPage() {
                 {proposal.state === 1 && account && (
                     <div className="glass-card p-6 border-l-4 border-blue-500">
                         <h3 className="font-bold mb-4">Cast Your Vote</h3>
-                        <div className="space-y-2">
-                            <button onClick={() => castVote(1)} disabled={voting} className="btn w-full bg-green-900/40 hover:bg-green-800/60 text-green-400 border border-green-500/30 py-3 flex items-center justify-center gap-2">
-                                <CheckCircle size={18} /> Vote For
-                            </button>
-                            <button onClick={() => castVote(0)} disabled={voting} className="btn w-full bg-red-900/40 hover:bg-red-800/60 text-red-400 border border-red-500/30 py-3 flex items-center justify-center gap-2">
-                                <XCircle size={18} /> Vote Against
-                            </button>
-                            <button onClick={() => castVote(2)} disabled={voting} className="btn w-full bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600/30 py-3 flex items-center justify-center gap-2">
-                                <MinusCircle size={18} /> Abstain
-                            </button>
-                        </div>
+
+                        {Number(votingPower) > 0 ? (
+                            <div className="space-y-2">
+                                <button onClick={() => castVote(1)} disabled={voting} className="btn w-full bg-green-900/40 hover:bg-green-800/60 text-green-400 border border-green-500/30 py-3 flex items-center justify-center gap-2">
+                                    <CheckCircle size={18} /> Vote For
+                                </button>
+                                <button onClick={() => castVote(0)} disabled={voting} className="btn w-full bg-red-900/40 hover:bg-red-800/60 text-red-400 border border-red-500/30 py-3 flex items-center justify-center gap-2">
+                                    <XCircle size={18} /> Vote Against
+                                </button>
+                                <button onClick={() => castVote(2)} disabled={voting} className="btn w-full bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600/30 py-3 flex items-center justify-center gap-2">
+                                    <MinusCircle size={18} /> Abstain
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
+                                <div className="flex items-center gap-2 text-yellow-500 font-bold mb-2">
+                                    <AlertTriangle size={18} /> No Voting Power
+                                </div>
+                                <p className="text-gray-400 text-sm mb-4">
+                                    You have tokens properly, but you must <strong>Delegate</strong> them to yourself to activate voting power.
+                                    <br /><br />
+                                    <em>Note: If you delegated AFTER this proposal started, you cannot vote on this specific proposal.</em>
+                                </p>
+                                <button
+                                    onClick={delegate}
+                                    className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
+                                >
+                                    Activate Voting Power
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
