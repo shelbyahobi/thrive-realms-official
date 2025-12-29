@@ -3,8 +3,12 @@ import TRSSaleArtifact from '../app/abi/TRSSale.json';
 import TRSGovernorArtifact from '../app/abi/TRSGovernor.json';
 import DividendVaultArtifact from '../app/abi/DividendVault.json';
 import ProjectRegistryArtifact from '../app/abi/ExecutionRegistry.json'; // Aliased for legacy compat, or use ExecutionRegistry export
-import OpportunityRegistryArtifact from '../app/abi/OpportunityRegistry.json';
-import ProjectEscrowArtifact from '../app/abi/ProjectEscrow.json';
+import OpportunityRegistryArtifact from "../../artifacts/contracts/OpportunityRegistry.sol/OpportunityRegistry.json";
+import ProjectFactoryArtifact from "../../artifacts/contracts/ProjectFactory.sol/ProjectFactory.json";
+import ProjectEscrowArtifact from "../../artifacts/contracts/ProjectEscrow.sol/ProjectEscrow.json";
+import PolicyRegistryArtifact from "../../artifacts/contracts/PolicyRegistry.sol/PolicyRegistry.json";
+import ReputationRegistryArtifact from "../../artifacts/contracts/ReputationRegistry.sol/ReputationRegistry.json";
+import RevenueRouterArtifact from "../../artifacts/contracts/RevenueRouter.sol/RevenueRouter.json";
 
 // Deployed on BSC Testnet (TRSSale Logic Fixed)
 export const CONTRACT_ADDRESSES = {
@@ -15,8 +19,12 @@ export const CONTRACT_ADDRESSES = {
 
     // Functional
     SALE: "0x72F534A7dB15947F351eFc35b2D1e979D1156F81",
-    PROJECT_REGISTRY: "0xFD3791619881ec944Ab7080e84A9C818b2c59A1B", // Execution Ledger
+    PROJECT_REGISTRY: "0xFD3791619881ec944Ab7080e84A9C818b2c59A1B", // Execution Ledger (Legacy Alias)
+    EXECUTION_REGISTRY: "0xFD3791619881ec944Ab7080e84A9C818b2c59A1B", // Proper Name
     OPPORTUNITY_REGISTRY: "0xfaA16C8Ea6f5177454Ed890403Fd55ef91274a6D", // Intelligence Vault
+    PROJECT_FACTORY: "0xB934522Cc75c0245226D132D93922B487B2E576F", // Phase 2 Factory
+    POLICY_REGISTRY: "0x94CFb7115857245b7803a0E8246e72F5015b601B",
+    REPUTATION_REGISTRY: "0x40D4e2a47290530A2c6386BD1b2F2b4A2472F940",
 
     // 5-Wallet Structure
     DIVIDEND_VAULT: "0x8EFccF257A361b16805FBb12aBB80E4AF06E7758",
@@ -34,5 +42,10 @@ export const CONTRACT_ABIS = {
     DividendVault: DividendVaultArtifact.abi,
     ExecutionRegistry: ProjectRegistryArtifact.abi, // Using ExecutionRegistry ABI
     OpportunityRegistry: OpportunityRegistryArtifact.abi,
-    ProjectEscrow: ProjectEscrowArtifact.abi
+    ProjectFactory: ProjectFactoryArtifact.abi,
+    ProjectEscrow: ProjectEscrowArtifact.abi,
+    PolicyRegistry: PolicyRegistryArtifact.abi,
+    ReputationRegistry: ReputationRegistryArtifact.abi,
+    RevenueRouter: RevenueRouterArtifact.abi,
+    RevenueRouter: RevenueRouterArtifact.abi
 };

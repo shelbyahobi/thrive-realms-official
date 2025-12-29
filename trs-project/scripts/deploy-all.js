@@ -17,7 +17,11 @@ async function main() {
 
     // 2. Deploy Timelock (minDelay = 0 for dev)
     const Timelock = await hre.ethers.getContractFactory("TRSTimelock");
-    const minDelay = 0;
+    // Phase 1 Compliance: 48h (172800s) for public networks, 0 for local/hardhat
+    const networkName = hre.network.name;
+    const minDelay = (networkName === "bscTestnet" || networkName === "bscMainnet") ? 300 : 0; // 5 mins for Testnet (Audit Proof), 0 for Dev
+    // NOTE: For Mainnet, change 300 to 172800
+    console.log(`Deploying Timelock with Delay: ${minDelay} seconds`);
     const proposers = [deployer.address];
     const executors = [deployer.address];
     const admin = deployer.address;

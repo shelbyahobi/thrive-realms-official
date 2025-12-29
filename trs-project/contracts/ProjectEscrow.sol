@@ -4,8 +4,9 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract ProjectEscrow is Ownable {
+contract ProjectEscrow is Ownable, Pausable {
     using SafeERC20 for IERC20;
 
     struct Milestone {
@@ -29,6 +30,8 @@ contract ProjectEscrow is Ownable {
     
     event MilestoneReleased(uint256 indexed index, uint256 amount);
     event ReportSubmitted(uint256 indexed index, string reportURI);
+    event ExecutorChanged(address indexed oldExecutor, address indexed newExecutor);
+    event FundsReturned(address indexed token, uint256 amount);
 
     modifier onlyExecutor() {
         require(msg.sender == executor, "Not Executor");
@@ -70,7 +73,7 @@ contract ProjectEscrow is Ownable {
         transferOwnership(_owner);
     }
 
-    function submitReport(uint256 index, string memory _reportURI) external onlyExecutor {
+    function submitReport(uint256 index, string memory _reportURI) external onlyExecutor whenNotPaused {
         require(index < milestones.length, "Invalid index");
         Milestone storage m = milestones[index];
         require(!m.paid, "Already paid");
@@ -80,7 +83,7 @@ contract ProjectEscrow is Ownable {
         emit ReportSubmitted(index, _reportURI);
     }
 
-    function releaseMilestone(uint256 index) external onlyOwner {
+    function releaseMilestone(uint256 index) external onlyOwner whenNotPaused {
         require(index < milestones.length, "Invalid index");
         Milestone storage m = milestones[index];
         require(!m.paid, "Already paid");
@@ -91,6 +94,27 @@ contract ProjectEscrow is Ownable {
         
         budgetToken.safeTransfer(executor, m.amount);
         emit MilestoneReleased(index, m.amount);
+    }
+
+    // --- Emergency / Governance Override Functions (Phase 1 Compliance) ---
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    function setExecutor(address _newExecutor) external onlyOwner {
+        require(_newExecutor != address(0), "Invalid address");
+        emit ExecutorChanged(executor, _newExecutor);
+        executor = _newExecutor;
+    }
+
+    function returnFunds(IERC20 _token, uint256 _amount) external onlyOwner {
+        _token.safeTransfer(owner(), _amount);
+        emit FundsReturned(address(_token), _amount);
     }
     
     function getMilestoneCount() external view returns (uint256) {

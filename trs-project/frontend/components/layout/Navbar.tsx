@@ -11,10 +11,12 @@ export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const links = [
-        { name: 'Dashboard', href: '/dashboard' },
+        { name: 'Command Center', href: '/dashboard' },
         { name: 'Governance', href: '/governance' },
         { name: 'Opportunities', href: '/opportunities' },
         { name: 'Transparency', href: '/transparency' },
+        { name: 'Vault', href: '/vault' },
+        { name: 'Executor', href: '/executor' },
         { name: 'Whitepaper', href: '/whitepaper' },
     ];
 

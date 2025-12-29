@@ -9,7 +9,8 @@ import DividendDashboard from '../../components/dao/DividendDashboard';
 import TreasuryWidget from '../../components/dashboard/TreasuryWidget';
 import ActiveProposalsWidget from '../../components/dashboard/ActiveProposalsWidget';
 import ActionCenterWidget from '../../components/dashboard/ActionCenterWidget';
-import PartnerStatusWidget from '../../components/dashboard/PartnerStatusWidget';
+import ExecutorStatusWidget from '../../components/dashboard/ExecutorStatusWidget'; // [PHASE 3] New
+import PolicyHealthWidget from '../../components/dashboard/PolicyHealthWidget';     // [PHASE 3] New
 import FoundingPlaybookWidget from '../../components/dashboard/FoundingPlaybookWidget';
 import CommunityStatsWidget from '../../components/dashboard/CommunityStatsWidget';
 import { Shield, Sparkles } from 'lucide-react';
@@ -53,7 +54,7 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-12">
             <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
                 <Sparkles className="text-purple-500" />
-                Command Center <span className="text-xs bg-white/10 px-2 py-1 rounded text-purple-300">v1.1</span>
+                Command Center <span className="text-xs bg-white/10 px-2 py-1 rounded text-purple-300">v1.2</span>
             </h1>
 
             {/* Stats Overview */}
@@ -74,8 +75,11 @@ export default function Dashboard() {
                     <p className="text-2xl font-mono text-white truncate" title={balance}>{parseFloat(balance).toLocaleString()} TRS</p>
                 </div>
 
-                {/* 2. Partner Status (Unified) */}
-                <PartnerStatusWidget />
+                {/* 2. Executor Status (Unified Reputation) */}
+                <ExecutorStatusWidget />
+
+                {/* 2.5 Policy Health (Unified Governance) */}
+                <PolicyHealthWidget />
 
                 {/* 2.5 Strategic Playbook */}
                 <FoundingPlaybookWidget />

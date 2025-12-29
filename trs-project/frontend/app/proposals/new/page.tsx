@@ -16,7 +16,7 @@ const CATEGORIES = [
 const EXECUTION_MODELS = ["Approved Company", "Approved Individual", "Internal DAO Execution"];
 
 // Proposal Types mapped to User's Architecture
-type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY';
+type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD';
 
 function NewProposalContent() {
     const { provider, signer, account } = useWallet();
@@ -28,15 +28,17 @@ function NewProposalContent() {
     const [type, setType] = useState<ProposalType>('ENTITY');
     const [loading, setLoading] = useState(false);
     const [userTier, setUserTier] = useState('');
+    const [reputation, setReputation] = useState(0);
 
     // --- FORM DATA ---
     const [title, setTitle] = useState('');
     const [summary, setSummary] = useState('');
 
-    // Type A: Entity
+    // Type A/D/E: Entity / Bridge / Pod
     const [entityName, setEntityName] = useState('');
     const [entityAddress, setEntityAddress] = useState('');
     const [entityUrl, setEntityUrl] = useState('');
+    const [jurisdiction, setJurisdiction] = useState('');
 
     // Type B: Funding
     const [budget, setBudget] = useState('');
@@ -51,12 +53,14 @@ function NewProposalContent() {
     useEffect(() => {
         if (provider && account) {
             checkEligibility();
+            fetchReputation();
         }
         // Auto-select type from URL
         const t = searchParams.get('type');
         if (t === 'entity') setType('ENTITY');
         if (t === 'funding') setType('FUNDING');
         if (t === 'opportunity') setType('OPPORTUNITY');
+        if (t === 'fast_track') setType('FAST_TRACK');
     }, [provider, account, searchParams]);
 
     async function checkEligibility() {
@@ -73,10 +77,22 @@ function NewProposalContent() {
         }
     }
 
-    const typeConfig = {
+    async function fetchReputation() {
+        if (!provider || !account) return;
+        try {
+            const registry = new ethers.Contract(CONTRACT_ADDRESSES.REPUTATION_REGISTRY, CONTRACT_ABIS.ReputationRegistry, provider);
+            const score = await registry.getScore(account);
+            setReputation(Number(score));
+        } catch (e) {
+            console.error("Reputation check failed", e);
+        }
+
+    }
+
+    const typeConfig: Record<ProposalType, { title: string, desc: string, icon: any, color: string }> = {
         'ENTITY': {
-            title: "Entity Registration",
-            desc: "Whitelist a new Execution Partner (Company/Individual) to perform paid mandates.",
+            title: "Standard Verification",
+            desc: "Whitelist a new Execution Partner (Company/Individual).",
             icon: <Building2 size={32} />,
             color: "blue"
         },
@@ -91,6 +107,24 @@ function NewProposalContent() {
             desc: "Submit an investment opportunity to the Intelligence Vault (No immediate funding).",
             icon: <Globe size={32} />,
             color: "purple"
+        },
+        'FAST_TRACK': {
+            title: "Fast Track Funding",
+            desc: "Accelerated funding for high-reputation partners (Score > 80 required).",
+            icon: <ShieldCheck size={32} />,
+            color: "orange"
+        },
+        'FIAT_BRIDGE': {
+            title: "Fiat Bridge Authorization",
+            desc: "Authorize a new Fiat On/Off-Ramp Provider under strict policy controls.",
+            icon: <Banknote size={32} />,
+            color: "cyan"
+        },
+        'EXECUTION_POD': {
+            title: "Execution Pod Creation",
+            desc: "Spin up a dedicated sub-DAO (Pod) for specific geographic/sector mandates.",
+            icon: <Users size={32} />,
+            color: "pink"
         }
     };
 
@@ -101,12 +135,12 @@ function NewProposalContent() {
 
         md += `## Executive Summary\n${summary}\n\n`;
 
-        if (type === 'ENTITY') {
-            md += `## Entity Details\n- **Name:** ${entityName}\n- **Wallet:** \`${entityAddress}\`\n- **Website:** ${entityUrl}\n\n`;
-            md += `## Mandate Scope\nVerified Execution Partners are eligible to receive DAO funds for approved interactions.`;
+        if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
+            md += `## Entity Details\n- **Name:** ${entityName}\n- **Wallet:** \`${entityAddress}\`\n- **Jurisdiction:** ${jurisdiction}\n- **Website:** ${entityUrl}\n\n`;
+            md += `## Mandate Scope\nAuthorized Execution Entity.`;
         }
-        else if (type === 'FUNDING') {
-            md += `## Funding Request\n- **Total Budget:** ${budget} TRS\n- **Executor:** \`${executor}\`\n\n`;
+        else if (type === 'FUNDING' || type === 'FAST_TRACK') {
+            md += `## ${type === 'FAST_TRACK' ? 'Fast Track ' : ''}Funding Request\n- **Total Budget:** ${budget} TRS\n- **Executor:** \`${executor}\`\n\n`;
             md += `## Milestones\n`;
             milestones.forEach((m, i) => md += `1. **${m.desc}**: ${m.amount} TRS\n`);
         }
@@ -129,13 +163,24 @@ function NewProposalContent() {
             let values: number[] = [];
             let calldatas: string[] = [];
 
-            if (type === 'ENTITY') {
-                // TYPE A: Execute setVerified on Registry
-                // ExecutionRegistry.setVerified(address, bool)
+            if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
+                // TYPE A/D/E: Execute registerEntity on Registry
+                // registerEntity(address, type, name, jurisdiction, metadata)
                 const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
-                const data = regInterface.encodeFunctionData("setVerified", [entityAddress, true]);
 
-                targets = [CONTRACT_ADDRESSES.PROJECT_REGISTRY]; // Aliased ExecutionRegistry
+                let typeEnum = 1; // STANDARD
+                if (type === 'FIAT_BRIDGE') typeEnum = 2;
+                if (type === 'EXECUTION_POD') typeEnum = 3;
+
+                const data = regInterface.encodeFunctionData("registerEntity", [
+                    entityAddress,
+                    typeEnum,
+                    entityName,
+                    jurisdiction,
+                    entityUrl // passing URL as metadata for now
+                ]);
+
+                targets = [CONTRACT_ADDRESSES.EXECUTION_REGISTRY];
                 values = [0];
                 calldatas = [data];
             }
@@ -152,12 +197,48 @@ function NewProposalContent() {
                 calldatas = [data];
             }
             else {
-                // TYPE B: Funding
-                // For now, Signal Only (as we lack the Factory contract on testnet)
-                // We send a 0-value tx to Token just to record it on chain
-                targets = [CONTRACT_ADDRESSES.TOKEN];
-                values = [0];
-                calldatas = ["0x"];
+                // TYPE B & FAST_TRACK: Funding - Batch Execution (Approve + CreateProject)
+                // 1. Calculate Total Budget
+                let totalBudget = BigInt(0);
+                const milestoneAmounts: BigInt[] = [];
+                const milestoneDescs: string[] = [];
+
+                milestones.forEach(m => {
+                    const amtWei = ethers.parseEther(m.amount);
+                    totalBudget += amtWei;
+                    milestoneAmounts.push(amtWei);
+                    milestoneDescs.push(m.desc);
+                });
+
+                // 2. Generate Calldata for Action 1: Token.approve(Factory, Total)
+                const tokenInterface = new ethers.Interface(CONTRACT_ABIS.TRSToken);
+                const approveData = tokenInterface.encodeFunctionData("approve", [
+                    CONTRACT_ADDRESSES.PROJECT_FACTORY,
+                    totalBudget.toString()
+                ]);
+
+                // 3. Generate Calldata for Action 2: Factory.createProject(...)
+                const factoryInterface = new ethers.Interface(CONTRACT_ABIS.ProjectFactory);
+
+                // projectID generation (timestamp + random suffix for uniqueness)
+                const projId = `PRJ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+                const createData = factoryInterface.encodeFunctionData("createProject", [
+                    projId,
+                    title,
+                    "General Funding", // Category placeholder
+                    "Global",          // Country placeholder
+                    "DAO",             // Region placeholder
+                    executor,          // The Executor Wallet
+                    CONTRACT_ADDRESSES.TOKEN, // Budget Token
+                    milestoneAmounts,
+                    milestoneDescs
+                ]);
+
+                // 4. Construct Batch Proposal
+                targets = [CONTRACT_ADDRESSES.TOKEN, CONTRACT_ADDRESSES.PROJECT_FACTORY];
+                values = [0, 0];
+                calldatas = [approveData, createData];
             }
 
             const tx = await gov.propose(targets, values, calldatas, description);
@@ -201,20 +282,32 @@ function NewProposalContent() {
                 {step === 1 && (
                     <div className="animate-fadeIn">
                         <h2 className="text-2xl font-bold text-white mb-6">Select Proposal Type</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {(Object.keys(typeConfig) as ProposalType[]).map((t) => (
-                                <button key={t}
-                                    onClick={() => { setType(t); setStep(2); }}
-                                    className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/50 transition text-left group relative overflow-hidden"
-                                >
-                                    <div className={`absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition text-${typeConfig[t].color}-500`}>
-                                        {typeConfig[t].icon}
-                                    </div>
-                                    <div className={`text-${typeConfig[t].color}-400 mb-4`}>{typeConfig[t].icon}</div>
-                                    <h3 className="text-xl font-bold text-white mb-2">{typeConfig[t].title}</h3>
-                                    <p className="text-sm text-gray-400">{typeConfig[t].desc}</p>
-                                </button>
-                            ))}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            {(Object.keys(typeConfig) as ProposalType[]).map((t) => {
+                                const isDisabled = t === 'FAST_TRACK' && reputation < 80;
+                                return (
+                                    <button key={t}
+                                        disabled={isDisabled}
+                                        onClick={() => { setType(t); setStep(2); }}
+                                        className={`p-6 rounded-xl border transition text-left group relative overflow-hidden ${isDisabled
+                                            ? 'bg-white/5 border-white/5 opacity-50 cursor-not-allowed grayscale'
+                                            : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/50'
+                                            }`}
+                                    >
+                                        <div className={`absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition text-${typeConfig[t].color}-500`}>
+                                            {typeConfig[t].icon}
+                                        </div>
+                                        <div className={`text-${typeConfig[t].color}-400 mb-4`}>{typeConfig[t].icon}</div>
+                                        <h3 className="text-xl font-bold text-white mb-2">{typeConfig[t].title}</h3>
+                                        <p className="text-sm text-gray-400 mb-2">{typeConfig[t].desc}</p>
+                                        {isDisabled && (
+                                            <div className="text-xs text-red-400 font-bold bg-red-900/20 py-1 px-2 rounded inline-block">
+                                                Requires Rep Score 80+ ({reputation || 0})
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
