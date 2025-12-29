@@ -88,23 +88,27 @@ async function main() {
     // Grant Executor Role to 'Zero Address' (Open Execution) or Deployer for testing
     // Keeping deployer as executor for now to make scripts easy
 
-    // 7. Transfer Token Supply to Timelock (Treasury)
-    // The Sale contract pulls from the Treasury via allowance, OR we send to Sale directly?
-    // Based on previous convos, Timelock holds funds.
-    const totalSupply = await token.totalSupply();
-    await (await token.transfer(timelock.target, totalSupply)).wait();
-    console.log("Transferred 1B TRS to Timelock");
+    // 7. Fund the Sale Contract
+    // Transfer 100 Million TRS to Sale contract for the public round
+    const saleAmount = hre.ethers.parseEther("100000000"); // 100M
+    await (await token.transfer(sale.target, saleAmount)).wait();
+    console.log("Transferred 100M TRS to Sale Limit");
 
-    // 8. Approve Sale to spend Timelock funds
-    // Since Timelock is the holder, it must approve the Sale contract.
-    // deployer needs to schedule this via Timelock since deployer has PROPOSER_ROLE
-    const maxUint = hre.ethers.MaxUint256;
-    const approveData = token.interface.encodeFunctionData("approve", [sale.target, maxUint]);
+    // 8. Start the Sale
+    await (await sale.startSale()).wait();
+    console.log("Sale master switch turned ON");
 
-    // Execute immediately (delay 0)
-    await (await timelock.schedule(token.target, 0, approveData, hre.ethers.ZeroHash, hre.ethers.id("setup_sale"), 0)).wait();
-    await (await timelock.execute(token.target, 0, approveData, hre.ethers.ZeroHash, hre.ethers.id("setup_sale"))).wait();
-    console.log("Approved Sale contract to spend Treasury funds");
+    // 9. Transfer Remaining Supply to Timelock (Treasury)
+    // The rest (900M) goes to the secure Treasury
+    const remainingSupply = await token.balanceOf(deployer.address);
+    if (remainingSupply > 0) {
+        await (await token.transfer(timelock.target, remainingSupply)).wait();
+        console.log(`Transferred remaining ${hre.ethers.formatEther(remainingSupply)} TRS to Timelock`);
+    }
+
+    // 10. Grant Roles (Simplified)
+    await (await timelock.grantRole(PROPOSER_ROLE, governor.target)).wait();
+    console.log("Granted Proposer Role to Governor");
 
     console.log("\n--- DEPLOYMENT COMPLETE ---");
     console.log("Update frontend/lib/contracts.ts with these:");
