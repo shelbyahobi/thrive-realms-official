@@ -3,31 +3,33 @@ import { useState, useEffect } from 'react';
 import { ethers, formatEther, parseEther } from 'ethers';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
 import { useWallet } from '../../hooks/useWallet';
+import { getReadProvider } from '../../lib/providers'; // New import
 
 export default function TokenSale() {
-    const { signer, provider, account } = useWallet();
+    const { signer, provider, account, chainId } = useWallet();
     const [buyAmount, setBuyAmount] = useState('');
     const [price, setPrice] = useState('0');
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const isWrongNetwork = chainId && chainId !== '97'; // 97 is BSC Testnet
+
     useEffect(() => {
-        if (provider) fetchPrice();
-    }, [provider]);
+        // ALWAYS fetch price on load, using fallback if needed
+        fetchPrice();
+    }, [provider, chainId]);
 
     async function fetchPrice() {
-        if (!provider) {
-            console.log("Waiting for provider to load...");
-            return;
-        }
+        // Use wallet provider OR fallback to public RPC
+        const activeProvider = provider || getReadProvider();
+
         try {
-            const sale = new ethers.Contract(CONTRACT_ADDRESSES.SALE, CONTRACT_ABIS.TRSSale, provider);
+            const sale = new ethers.Contract(CONTRACT_ADDRESSES.SALE, CONTRACT_ABIS.TRSSale, activeProvider);
             const p = await sale.getCurrentPrice();
             setPrice(formatEther(p));
             console.log("Fetched Price:", formatEther(p));
         } catch (e: any) {
             console.error("Price Fetch Error:", e);
-            // Optionally set a fallback or error state UI
             setPrice("Error");
         }
     }
@@ -36,7 +38,7 @@ export default function TokenSale() {
     const [estimatedOut, setEstimatedOut] = useState('0');
 
     useEffect(() => {
-        if (!buyAmount || !price || price === '0') {
+        if (!buyAmount || !price || price === '0' || price === 'Error') {
             setEstimatedOut('0');
             return;
         }
@@ -60,13 +62,17 @@ export default function TokenSale() {
             return;
         }
 
+        if (isWrongNetwork) {
+            alert("Wrong Network! Switch to BSC Testnet (97).");
+            return;
+        }
+
         setLoading(true);
         setStatus("Processing transaction...");
         try {
             console.log("Buying tokens with", buyAmount, "BNB");
             const sale = new ethers.Contract(CONTRACT_ADDRESSES.SALE, CONTRACT_ABIS.TRSSale, signer);
-            // Manual gas limit to bypass estimation errors (often implies revert scenarios like Wallet Limit)
-            // Increased to 800,000 to cover any complexity
+            // Manual gas limit to bypass estimation errors
             const tx = await sale.buyTokens({ value: parseEther(buyAmount), gasLimit: 800000 });
             await tx.wait();
             setStatus("Success! Tokens purchased.");
@@ -80,7 +86,7 @@ export default function TokenSale() {
                 alert("You rejected the transaction.");
             } else if (e.message && e.message.includes("insufficient funds")) {
                 setStatus("Error: Insufficient BNB for value + gas.");
-                alert("Insufficient BNB in your wallet.");
+                alert("Insufficient BNB in your wallet. (You need tBNB)");
             } else {
                 setStatus("Failed: " + (e.reason || e.message || "Unknown Error"));
                 alert("Transaction Failed. Check console for details.");
@@ -89,7 +95,20 @@ export default function TokenSale() {
         setLoading(false);
     }
 
-    if (!account) return null;
+    // Only block the UI if we are DEFINITELY on wrong network and connected
+    if (account && isWrongNetwork) {
+        return (
+            <div className="glass-card p-6 bg-red-900/20 border border-red-500/50">
+                <h3 className="text-xl font-bold mb-2 text-white">Wrong Network</h3>
+                <p className="text-sm text-gray-300 mb-4">
+                    You are connected to Chain ID <span className="font-mono text-red-400">{chainId}</span>.
+                    Please switch to **BSC Testnet** (Chain ID 97) to participate.
+                </p>
+            </div>
+        );
+    }
+
+    // If not connected, show the UI (Read-Only) but buying will trigger alert
 
     return (
         <div className="glass-card p-6 bg-gradient-to-br from-purple-900/20 to-black border border-purple-500/30">
@@ -122,11 +141,21 @@ export default function TokenSale() {
                 <button
                     onClick={buyTokens}
                     disabled={loading}
-                    className="w-full btn bg-purple-600 hover:bg-purple-700 text-white py-3 font-bold rounded shadow-lg shadow-purple-900/20"
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? "Buying..." : "Purchase Tokens"}
+                    {loading ? 'Processing...' : 'Buy TRS'}
                 </button>
-                {status && <p className="text-xs text-center text-gray-300 bg-white/5 p-2 rounded">{status}</p>}
+
+                {status && (
+                    <div className={`text-xs text-center p-2 rounded ${status.includes("Success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                        {status}
+                    </div>
+                )}
+
+                <p className="text-xs text-gray-500 text-center mt-2">
+                    *Requires Testnet BNB (tBNB).
+                    {!account && <span className="block text-amber-500 font-bold mt-1">Connect Wallet to Purchase</span>}
+                </p>
             </div>
         </div>
     );
