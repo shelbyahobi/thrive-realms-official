@@ -21,9 +21,9 @@ export default function OpportunityForm() {
                 <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mb-4 text-emerald-400">
                     <CheckCircle size={32} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Submission Received!</h3>
-                <p className="text-gray-300 text-sm mb-6">
-                    Our governance team checks new submissions every 48 hours. Keep an eye on the "Signals" section.
+                <h3 className="text-xl font-bold text-white mb-2">Submission Sent to Intelligent Vault</h3>
+                <p className="text-gray-300 text-sm mb-6 max-w-[80%] mx-auto">
+                    Your proposal is now in the <strong>"Waiting Room"</strong> for community audit. Once approved by a Local Rep or DAO vote, it will move to the active Funding Round.
                 </p>
                 <button
                     onClick={() => setStatus('idle')}

@@ -8,6 +8,7 @@ import { Shield, Lock, Briefcase, Zap, Globe, Sprout, Building, FileText, MapPin
 import Link from 'next/link';
 import OpportunityForm from '../../components/opportunities/OpportunityForm';
 import SuccessCarousel from '../../components/opportunities/SuccessCarousel';
+import LocalRepLocator from '../../components/opportunities/LocalRepLocator';
 
 export default function OpportunitiesPage() {
     const { account, provider } = useWallet();
@@ -155,41 +156,36 @@ export default function OpportunitiesPage() {
                         <SuccessCarousel />
                     </div>
 
-                    {/* Investment Mandate & Local Rep */}
-                    <div className="glass-card p-8 bg-gradient-to-br from-white/5 to-transparent border-white/10">
+                    {/* Local Representative Locator */}
+                    <LocalRepLocator />
+
+                    {/* Investment Mandate Summary */}
+                    <div className="glass-card p-6 bg-gradient-to-br from-white/5 to-transparent border-white/10 mt-6">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold text-white">Investment Mandate (Phase 1)</h3>
-                            <button className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded border border-white/10 transition">
+                            <Link href="/governance/mandate" className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded transition">
                                 View Full Policy
-                            </button>
+                            </Link>
                         </div>
-
-                        <p className="text-sm text-gray-300 mb-6 leading-relaxed">
+                        <p className="text-gray-400 leading-relaxed mb-6">
                             Thrive Realm prioritizes projects in low-income and emerging regions where access to capital is structurally limited.
                         </p>
 
-                        <h4 className="text-sm font-bold text-white mb-2">Priority Regions:</h4>
-                        <ul className="grid grid-cols-2 gap-2 text-xs text-gray-400 mb-6">
-                            <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Sub-Saharan Africa</li>
-                            <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> South Asia</li>
-                            <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Latin America</li>
-                            <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> MENA Region</li>
-                        </ul>
-
-                        {/* Local Rep Teaser */}
-                        <div className="bg-gradient-to-r from-purple-900/40 to-black p-4 rounded-lg flex items-center justify-between border border-purple-500/20">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
-                                    <MapPin size={20} />
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-bold text-sm">Need help applying?</h4>
-                                    <p className="text-[10px] text-gray-400">Talk to a Verified Local Ambassador in your language.</p>
-                                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-2">Priority Regions:</h4>
+                                <ul className="space-y-1 text-xs text-gray-500">
+                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Sub-Saharan Africa</li>
+                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Latin America</li>
+                                </ul>
                             </div>
-                            <button className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded transition">
-                                Find Rep
-                            </button>
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-2">&nbsp;</h4>
+                                <ul className="space-y-1 text-xs text-gray-500">
+                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> South Asia</li>
+                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> MENA Region</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
