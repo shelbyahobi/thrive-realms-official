@@ -18,6 +18,51 @@ export default function WhitepaperPage() {
 
                 <div className="prose prose-invert max-w-none space-y-12">
 
+                    {/* 0. Phase 0 Constitution */}
+                    <section className="border-b border-white/10 pb-12">
+                        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-6">Phase 0: Genesis & Immutable Guarantees</h2>
+                        <div className="bg-purple-900/10 border border-purple-500/30 rounded-xl p-8">
+                            <p className="text-gray-300 mb-6 font-medium">
+                                Phase 0 defines the immutable foundations of Thrive Realm. These rules apply immediately upon mainnet deployment and may not be altered without extraordinary governance consensus.
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Lock size={16} className="text-purple-400" /> 0.1 Token Supply & Control</h4>
+                                    <ul className="text-sm text-gray-400 space-y-1 list-disc pl-5">
+                                        <li>Fixed maximum supply of <strong>1,000,000,000 TRS</strong>.</li>
+                                        <li>No minting function exists.</li>
+                                        <li>No inflation, rebasing, or supply expansion.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Shield size={16} className="text-blue-400" /> 0.2 Anti-Whale & Distribution</h4>
+                                    <ul className="text-sm text-gray-400 space-y-1 list-disc pl-5">
+                                        <li><strong>Hard 1% maximum</strong> per wallet (EOA).</li>
+                                        <li>Exemptions: DAO Treasury & Execution Contracts only.</li>
+                                        <li>Exempt addresses are public and auditable.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Lock size={16} className="text-emerald-400" /> 0.3 Treasury Sovereignty</h4>
+                                    <ul className="text-sm text-gray-400 space-y-1 list-disc pl-5">
+                                        <li>All funds held in governance-controlled wallets.</li>
+                                        <li>No individual access (Founder/Dev) permitted.</li>
+                                        <li>Movements require specific Governance Approval.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-bold mb-3 flex items-center gap-2"><Shield size={16} className="text-red-400" /> 0.5 Execution Safety</h4>
+                                    <ul className="text-sm text-gray-400 space-y-1 list-disc pl-5">
+                                        <li>Approved proposals subject to <strong>48-hour timelock</strong>.</li>
+                                        <li>Emergency Pause exists strictly for critical exploits.</li>
+                                        <li>No Retroactive Changes to existing rights.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     {/* 1. About */}
                     <section>
                         <h2 className="text-2xl font-bold text-white mb-4">1. About Thrive Realm</h2>
@@ -81,6 +126,7 @@ export default function WhitepaperPage() {
                         <h2 className="text-2xl font-bold text-white mb-4">4. Token Economics (TRS)</h2>
                         <p className="text-gray-300 mb-6">
                             TRS is the governance and utility token of the Thrive Realm ecosystem, designed with strict supply controls to prevent centralization.
+                            <br /><span className="text-purple-300 font-bold">TRS has no administrative mint, burn, or clawback functionality after deployment.</span>
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -324,6 +370,7 @@ export default function WhitepaperPage() {
                         <div className="space-y-6 text-gray-300">
                             <p>
                                 We do not automate everything on day one. We layer automation as legitimacy grows.
+                                <br /><span className="text-yellow-400 font-bold">No enforcement contract will be activated on mainnet without prior testnet validation and public review.</span>
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="glass-card p-6">
@@ -448,8 +495,10 @@ export default function WhitepaperPage() {
                                     Funds are escrowed and released only upon completion of defined milestones.
                                 </li>
                                 <li className="bg-black/20 p-3 rounded text-sm text-gray-300 border border-white/5">
-                                    <strong className="block text-white mb-1">Emergency Pause</strong>
-                                    A "Guardian" role can pause protocol execution in response to security threats.
+                                    <strong className="block text-white mb-1">Guardian Role</strong>
+                                    Can <strong>Pause</strong> execution contracts during exploits.
+                                    <br />Cannot: Move funds, Approve proposals, Override votes.
+                                    <br />Actions are time-limited, public, and subject to DAO removal.
                                 </li>
                                 <li className="bg-black/20 p-3 rounded text-sm text-gray-300 border border-white/5">
                                     <strong className="block text-white mb-1">No Unilateral Access</strong>
@@ -499,6 +548,15 @@ export default function WhitepaperPage() {
                                 While Thrive Realm aims to generate revenue, it operates as a cooperative digital entity. Dividend distributions are automated by code and dependent on successful execution of community mandates, not the efforts of a central management team.
                             </p>
                         </div>
+                    </section>
+
+                    {/* Appendix: Deployment Status */}
+                    <section className="border-t border-white/10 pt-8 mb-12">
+                        <h2 className="text-xl font-bold text-gray-400 mb-4">Appendix: Deployment Status</h2>
+                        <ul className="list-disc pl-5 text-gray-500 text-sm space-y-2">
+                            <li><strong>Contracts:</strong> TRS sale and governance contracts are deployed on <strong>BSC Testnet</strong> for validation only.</li>
+                            <li><strong>Legal Entity:</strong> None at Phase 0. Thrive Realm operates as a decentralized autonomous organization.</li>
+                        </ul>
                     </section>
 
                 </div>
