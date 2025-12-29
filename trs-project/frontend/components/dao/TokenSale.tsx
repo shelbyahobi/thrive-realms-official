@@ -106,6 +106,12 @@ export default function TokenSale() {
                     You are connected to Chain ID <span className="font-mono text-red-400">{chainId}</span>.
                     Please switch to **BSC Testnet** (Chain ID 97) to participate.
                 </p>
+                <button
+                    onClick={switchNetwork}
+                    className="w-full py-2 rounded bg-red-600 hover:bg-red-500 text-white font-bold transition"
+                >
+                    Switch to BSC Testnet
+                </button>
             </div>
         );
     }
