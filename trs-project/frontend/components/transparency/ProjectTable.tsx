@@ -23,6 +23,47 @@ export function ProjectTable() {
     const [auditComment, setAuditComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // View State
+    const [viewProject, setViewProject] = useState<Project | null>(null);
+    const [audits, setAudits] = useState<any[]>([]);
+    const [loadingAudits, setLoadingAudits] = useState(false);
+
+    async function viewingProject(p: Project) {
+        setViewProject(p);
+        setLoadingAudits(true);
+        setAudits([]); // Clear old
+
+        if (typeof window.ethereum === 'undefined') return;
+
+        try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const registry = new ethers.Contract(
+                CONTRACT_ADDRESSES.PROJECT_REGISTRY,
+                CONTRACT_ABIS.ExecutionRegistry,
+                provider
+            );
+
+            // Fetch audits by iterating index until error
+            const results = [];
+            let i = 0;
+            while (true) {
+                try {
+                    // Try waiting for promise to fail or succeed
+                    const audit = await registry.projectAudits(p.address, i);
+                    results.push(audit);
+                    i++;
+                    if (i > 50) break; // Safety break
+                } catch (e) {
+                    break; // End of array
+                }
+            }
+            setAudits(results.reverse()); // Newest first
+        } catch (e) {
+            console.error(e);
+        }
+        setLoadingAudits(false);
+    }
+
     useEffect(() => {
         async function fetchProjects() {
             if (typeof window.ethereum === 'undefined') return;
@@ -125,68 +166,103 @@ export function ProjectTable() {
                                         onClick={() => setAuditingProject(p)}
                                         className="text-white hover:text-purple-400 text-xs border border-white/20 hover:border-purple-400 rounded px-2 py-1 transition-colors flex items-center gap-1"
                                     >
-                                        <Star className="w-3 h-3" /> Audit Report
+                                        <Star className="w-3 h-3" /> Audit
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {projects.length === 0 && (
-                            <tr>
-                                <td colSpan={5} className="p-8 text-center text-gray-500">No registered projects found on-chain.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                                    <button
+                                        onClick={() => viewingProject(p)}
+                                        className="text-white hover:text-blue-400 text-xs border border-white/20 hover:border-blue-400 rounded px-2 py-1 transition-colors flex items-center gap-1"
+                                    >
+                                        <ExternalLink className="w-3 h-3" /> Reports
+                                    </button>
+                                </div>
+                            </td>
+                </tr>
+            ))}
+                    {projects.length === 0 && (
+                        <tr>
+                            <td colSpan={5} className="p-8 text-center text-gray-500">No registered projects found on-chain.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div >
 
-            {/* Audit Modal */}
-            {auditingProject && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                    <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-2xl relative">
-                        <button
-                            onClick={() => setAuditingProject(null)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-                        >
-                            <X size={20} />
-                        </button>
-
-                        <h3 className="text-xl font-bold text-white mb-2">Audit Project</h3>
-                        <p className="text-sm text-gray-400 mb-6">Rate execution of <span className="text-purple-400">{auditingProject.name}</span></p>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-300 mb-1">Trust Score (0-100)</label>
-                                <input
-                                    type="number"
-                                    min="0" max="100"
-                                    value={auditScore}
-                                    onChange={(e) => setAuditScore(Number(e.target.value))}
-                                    className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-gray-300 mb-1">Audit Comment / Hash</label>
-                                <textarea
-                                    rows={3}
-                                    value={auditComment}
-                                    onChange={(e) => setAuditComment(e.target.value)}
-                                    placeholder="Confirm verification status..."
-                                    className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none"
-                                />
-                            </div>
-
-                            <button
-                                onClick={submitAudit}
-                                disabled={submitting}
-                                className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2"
-                            >
-                                {submitting ? 'Submitting to Blockchain...' : 'Sign & Submit Audit'}
-                            </button>
+            {/* Audit Modal (Write) */ }
+    {
+        auditingProject && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-2xl relative">
+                    <button onClick={() => setAuditingProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                        <X size={20} />
+                    </button>
+                    <h3 className="text-xl font-bold text-white mb-2">Audit Project</h3>
+                    <p className="text-sm text-gray-400 mb-6">Rate execution of <span className="text-purple-400">{auditingProject.name}</span></p>
+                    {/* Form */}
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-300 mb-1">Trust Score (0-100)</label>
+                            <input type="number" min="0" max="100" value={auditScore} onChange={(e) => setAuditScore(Number(e.target.value))} className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
                         </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-300 mb-1">Audit Comment / Hash</label>
+                            <textarea rows={3} value={auditComment} onChange={(e) => setAuditComment(e.target.value)} placeholder="Confirm verification status..." className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
+                        </div>
+                        <button onClick={submitAudit} disabled={submitting} className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
+                            {submitting ? 'Submitting...' : 'Sign & Submit Audit'}
+                        </button>
                     </div>
                 </div>
-            )}
+            </div>
+        )
+    }
+
+    {/* View Reports Modal (Read) */ }
+    {
+        viewProject && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                    <button onClick={() => setViewProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                        <X size={20} />
+                    </button>
+                    <h3 className="text-xl font-bold text-white mb-2">Transparency Reports</h3>
+                    <p className="text-sm text-gray-400 mb-6">Audit history for <span className="text-blue-400">{viewProject.name}</span></p>
+
+                    {loadingAudits ? (
+                        <div className="text-center py-8 text-gray-500">Fetching on-chain records...</div>
+                    ) : audits.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500 bg-white/5 rounded-lg border border-dashed border-white/10">
+                            No reports submitted yet.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {audits.map((a, i) => (
+                                <div key={i} className="glass-card p-4 border border-white/10 bg-black/20">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-lg font-bold ${a.score >= 80 ? 'text-green-400' : a.score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                                {a.score}/100
+                                            </span>
+                                            <span className="text-xs text-gray-500 px-2 py-0.5 bg-white/5 rounded">Trust Score</span>
+                                        </div>
+                                        <span className="text-xs text-gray-500 font-mono">
+                                            {new Date(Number(a.timestamp) * 1000).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-300 text-sm whitespace-pre-wrap mb-3 pl-2 border-l-2 border-white/10">
+                                        {a.comment}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono border-t border-white/5 pt-2">
+                                        <span>Auditor:</span>
+                                        <span className="text-blue-400">{a.auditor}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        )
+    }
         </>
     );
 }
