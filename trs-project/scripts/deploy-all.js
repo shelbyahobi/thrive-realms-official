@@ -29,10 +29,10 @@ async function main() {
     const governor = await Governor.deploy(
         token.target,
         timelock.target,
-        1,  // 1 block delay
-        20, // ~1 min period for testing
-        0,  // 0 threshold
-        4   // 4% quorum
+        200,    // 200 blocks delay (~10 mins) - Safer for snapshots
+        28800,  // 28800 blocks period (~24 hours) - Human friendly duration
+        0,      // 0 threshold
+        4       // 4% quorum
     );
     await governor.waitForDeployment();
     console.log("TRSGovernor deployed to:", governor.target);
