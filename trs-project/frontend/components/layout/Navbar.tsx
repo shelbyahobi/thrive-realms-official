@@ -24,7 +24,7 @@ export default function Navbar() {
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:text-purple-300 transition text-white">
                     <Activity className="text-purple-500" />
-                    Thrive Realms
+                    Thrive Realms <span className="text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded-full border border-purple-700/50">Testnet</span>
                 </Link>
 
                 {/* Desktop Links */}
