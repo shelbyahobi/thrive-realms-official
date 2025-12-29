@@ -305,7 +305,7 @@ export default function ProposalDetailPage() {
                                     {Number(votingPower) > 0 ? (
                                         <span>
                                             You currently have <strong>{Number(votingPower).toLocaleString()} Voting Power</strong>, BUT you had <strong>0 Power</strong> at the time this proposal was created (Snapshot Block #{proposal.snapshot}).
-                                            <br/><br/>
+                                            <br /><br />
                                             This means you acquired tokens or delegated <em>after</em> the proposal started. You will be able to vote on <strong>future</strong> proposals.
                                         </span>
                                     ) : (
@@ -315,30 +315,17 @@ export default function ProposalDetailPage() {
                                     )}
                                 </p>
                                 {Number(votingPower) === 0 && (
-                                    <button 
-                                        onClick={delegate} 
+                                    <button
+                                        onClick={delegate}
                                         className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
                                     >
                                         Activate Voting Power
                                     </button>
                                 )}
+                        )}
                             </div>
-                                <p className="text-gray-400 text-sm mb-4">
-                                    You have tokens properly, but you must <strong>Delegate</strong> them to yourself to activate voting power.
-                                    <br /><br />
-                                    <em>Note: If you delegated AFTER this proposal started, you cannot vote on this specific proposal.</em>
-                                </p>
-                                <button
-                                    onClick={delegate}
-                                    className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
-                                >
-                                    Activate Voting Power
-                                </button>
-                            </div>
-                )}
-            </div>
-                )}
+                        )}
+                    </div>
         </div>
-        </div >
-    );
+            );
 }
