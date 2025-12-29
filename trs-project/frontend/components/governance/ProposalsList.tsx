@@ -206,7 +206,15 @@ export default function ProposalsList() {
                     const desc = p.description || "";
                     const titleMatch = desc.match(/^#\s+(.+)$/m);
                     const title = titleMatch ? titleMatch[1] : `Proposal #${p.id.substring(0, 6)}...`;
-                    const summary = desc.replace(/^#\s+.+$/m, '').substring(0, 150) + "...";
+
+                    // Clean summary: Remove Title, Remove Markdown Tables (lines starting with |), Remove Headers
+                    let summary = desc
+                        .replace(/^#\s+.+$/m, '') // Remove Title
+                        .replace(/^\|.*$/gm, '')  // Remove Table Rows
+                        .replace(/^\s*[\-\*]{3,}\s*$/gm, '') // Remove HR
+                        .replace(/#+/g, '') // Remove Header hashes
+                        .trim()
+                        .substring(0, 150) + "...";
 
                     return (
                         <Link href={`/proposals/${p.id}`} key={p.id} className="block glass-card hover:border-purple-500/50 transition duration-200 group">
