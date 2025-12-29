@@ -8,21 +8,21 @@ import CompanyRegistryArtifact from '../app/abi/CompanyRegistry.json'; // New
 import JobRegistryArtifact from '../app/abi/JobRegistry.json'; // New
 import ExecutionRegistryArtifact from '../app/abi/ExecutionRegistry.json';
 
-// Deployed on BSC Testnet (Re-deployed with Funded Sale)
+// Deployed on BSC Testnet (Transparency Hooks Enabled)
 export const CONTRACT_ADDRESSES = {
     // Core Governance
-    TOKEN: "0xaFC99bE7996Ae21217b45dcE7111DC0AE526B741",
-    TIMELOCK: "0x04F243007CdC3f9311A295963b77b9a7bEC3abb6",
-    GOVERNOR: "0xdd0A98b7AB8D8bcaE2EA26E033F872474d844bbf",
+    TOKEN: "0xA0Ec16d810D69Fb68975a0b5aE4e7A88e3a0771E",
+    TIMELOCK: "0x9D05b3711121B0F5cc2D053d584c0bEd52d56460",
+    GOVERNOR: "0x036B3CfED7c37A10bAB1808cb9471a242549dd73",
 
     // Functional
-    SALE: "0xE07ef8D01b4064ceceC4e3987047D147f0560F8F",
-    PROJECT_REGISTRY: "0xF97724F4709EA4c481A82FF9A4040B5d56C601b2", // ExecutionRegistry
+    SALE: "0xf0AEBD2835f48c7b9cAB07ab5e83e9Bc1558F8A7",
+    PROJECT_REGISTRY: "0x40c884d3072e3104E3bcb6382ed9aD90CB712AF4", // ExecutionRegistry
 
     // 5-Wallet Structure
-    DIVIDEND_VAULT: "0x2365831F8e99feD822Bb5335f0d05aC571558a95",
-    FOUNDER_SPLITTER: "0x50C27c7D16A8B3240c290A7e82503Da802D1aCcD",
-    SEED_ESCROW: "0x8Bd01300C2e22F2A2513c565f5f289Ec239be6c1",
+    DIVIDEND_VAULT: "0x9dC4e6Ce87b9c5D8fCa9e13E36ABf3bFcFD35Af1",
+    FOUNDER_SPLITTER: "0x2757EEe5B4e28d6CD8A74d7a32b58B12A6691F84",
+    SEED_ESCROW: "0x55C4a6732f5f513752C49E5589f68FFc39424A4d",
 
     // Legacy / Placeholders
     USDT: "0x0000000000000000000000000000000000000000"

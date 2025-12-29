@@ -98,6 +98,15 @@ async function main() {
     await (await sale.startSale()).wait();
     console.log("Sale master switch turned ON");
 
+    // 9. Register Seed Project & Verify Deployer (Transparency Hook)
+    // 9a. Verify Deployer
+    await (await registry.setVerified(deployer.address, true)).wait();
+    console.log("Verified Deployer as Executor");
+
+    // 9b. Register the Seed Escrow
+    await (await registry.registerProject(seedEscrow.target, "Genesis Agri-Tech")).wait();
+    console.log("Registered Seed Project in ExecutionRegistry");
+
     // 9. Transfer Remaining Supply to Timelock (Treasury)
     // The rest (900M) goes to the secure Treasury
     const remainingSupply = await token.balanceOf(deployer.address);
