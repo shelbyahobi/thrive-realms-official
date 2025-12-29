@@ -6,22 +6,22 @@ import ProjectRegistryArtifact from '../app/abi/ExecutionRegistry.json'; // Alia
 import OpportunityRegistryArtifact from '../app/abi/OpportunityRegistry.json';
 import ProjectEscrowArtifact from '../app/abi/ProjectEscrow.json';
 
-// Deployed on BSC Testnet (Transparency Hooks Enabled)
+// Deployed on BSC Testnet (TRSSale Logic Fixed)
 export const CONTRACT_ADDRESSES = {
     // Core Governance
-    TOKEN: "0xF4B88C28852D7332AdF4939C1082e027cFA1CF29",
-    TIMELOCK: "0x78A7ad1625F565A33d9e58bB63bF19769E7591c3",
-    GOVERNOR: "0xA4aDb8bF661806d00Ad5F23662f86D7796f325BD",
+    TOKEN: "0x9C9618d2859a868b43C8500557d5B05a5A83f114",
+    TIMELOCK: "0x49F17Af4817e28f1fae76E6df022f3755309ae0B",
+    GOVERNOR: "0x93D84DD8222E891eB1FDaBE8D01F03a873d6c5A1",
 
     // Functional
-    SALE: "0x2452065278a34Dc98F64Cd459F680B6C1458DD27",
-    PROJECT_REGISTRY: "0x7cC186dd99F2021C69C8EF390dFAFa7aD4c4e999", // ExecutionRegistry
-    VAULT: "0x1dE8CFf01bacAFF8145c2E1907A4239224E4E493",       // OpportunityRegistry (Intelligence Vault)
+    SALE: "0x589473c644655321eD1F7825f47BEbed82Df5103",
+    PROJECT_REGISTRY: "0x55fd96Fe808FBeaAeb5E388cD66d9A686f264036", // ExecutionRegistry
+    VAULT: "0xD61552b05c611ba4e5aFDBBb34C8BA6BE58Eb829",       // OpportunityRegistry (Intelligence Vault)
 
     // 5-Wallet Structure
-    DIVIDEND_VAULT: "0x886bE8509894e2563a7463eFCb4766a516cb7d2B",
-    FOUNDER_SPLITTER: "0x6BEda4683e206e1b62958ed1Ffab663B374bAb5C",
-    SEED_ESCROW: "0xb1C65Ef73145CE592B117F25872e9798E4Ec8014",
+    DIVIDEND_VAULT: "0x15fb393f46E9c3425b13e1A7c63f4a0f84305809",
+    FOUNDER_SPLITTER: "0x52B68Ba69ef3711ea8536DD557a546B86E6BE792",
+    SEED_ESCROW: "0xfA65E33D7535b7fF5dE668B8d8C9E088Ed1151d9",
 
     // Legacy / Placeholders
     USDT: "0x0000000000000000000000000000000000000000"

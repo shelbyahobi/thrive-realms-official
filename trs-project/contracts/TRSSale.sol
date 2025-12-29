@@ -72,10 +72,9 @@ contract TRSSale is ReentrancyGuard, Ownable {
         (bool success, ) = treasury.call{value: msg.value}("");
         require(success, "BNB transfer failed");
 
-        // Transfer TRS from Treasury to Buyer
-        // Requires Treasury to have `approve(address(sale), amount)`
-        bool tokenSuccess = token.transferFrom(treasury, msg.sender, amount);
-        require(tokenSuccess, "Token transfer failed (Check allowance)");
+        // Transfer TRS from Sale Contract Inventory to Buyer
+        bool tokenSuccess = token.transfer(msg.sender, amount);
+        require(tokenSuccess, "Token transfer failed");
 
         emit TokensPurchased(msg.sender, amount, price);
     }
