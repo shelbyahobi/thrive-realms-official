@@ -17,10 +17,19 @@ contract ExecutionRegistry is Ownable {
         bool active;
     }
 
+    struct AuditResult {
+        address auditor;
+        uint8 score;
+        string comment;
+        uint256 timestamp;
+    }
+
     address[] public projectAddresses;
     mapping(address => ProjectInfo) public projects;
+    mapping(address => AuditResult[]) public projectAudits;
 
     event ProjectRegistered(address indexed project, string name);
+    event ProjectAudited(address indexed project, address indexed auditor, uint8 score);
 
     constructor() Ownable() {} 
 
@@ -36,6 +45,24 @@ contract ExecutionRegistry is Ownable {
         });
         
         emit ProjectRegistered(_escrow, _name);
+    }
+
+    function auditProject(address _project, uint8 _score, string memory _comment) external {
+        require(projects[_project].escrowAddress != address(0), "Project not found");
+        require(_score <= 100, "Score must be 0-100");
+        
+        projectAudits[_project].push(AuditResult({
+            auditor: msg.sender,
+            score: _score,
+            comment: _comment,
+            timestamp: block.timestamp
+        }));
+        
+        emit ProjectAudited(_project, msg.sender, _score);
+    }
+
+    function getAudits(address _project) external view returns (AuditResult[] memory) {
+        return projectAudits[_project];
     }
 
     function getAllProjects() external view returns (address[] memory) {
