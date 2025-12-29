@@ -322,10 +322,11 @@ export default function ProposalDetailPage() {
                                         Activate Voting Power
                                     </button>
                                 )}
-                        )}
                             </div>
                         )}
                     </div>
+                )}
+            </div>
         </div>
-            );
+    );
 }

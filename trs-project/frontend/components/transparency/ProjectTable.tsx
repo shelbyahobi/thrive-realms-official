@@ -174,95 +174,94 @@ export function ProjectTable() {
                                     >
                                         <ExternalLink className="w-3 h-3" /> Reports
                                     </button>
-                                </div>
-                            </td>
-                </tr>
-            ))}
-                    {projects.length === 0 && (
-                        <tr>
-                            <td colSpan={5} className="p-8 text-center text-gray-500">No registered projects found on-chain.</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div >
+                                </td>
+                            </tr>
+                        ))}
+                        {projects.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="p-8 text-center text-gray-500">No registered projects found on-chain.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div >
 
-            {/* Audit Modal (Write) */ }
-    {
-        auditingProject && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-2xl relative">
-                    <button onClick={() => setAuditingProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-                        <X size={20} />
-                    </button>
-                    <h3 className="text-xl font-bold text-white mb-2">Audit Project</h3>
-                    <p className="text-sm text-gray-400 mb-6">Rate execution of <span className="text-purple-400">{auditingProject.name}</span></p>
-                    {/* Form */}
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-300 mb-1">Trust Score (0-100)</label>
-                            <input type="number" min="0" max="100" value={auditScore} onChange={(e) => setAuditScore(Number(e.target.value))} className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
+            {/* Audit Modal (Write) */}
+            {
+                auditingProject && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                        <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-2xl relative">
+                            <button onClick={() => setAuditingProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                            <h3 className="text-xl font-bold text-white mb-2">Audit Project</h3>
+                            <p className="text-sm text-gray-400 mb-6">Rate execution of <span className="text-purple-400">{auditingProject.name}</span></p>
+                            {/* Form */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-300 mb-1">Trust Score (0-100)</label>
+                                    <input type="number" min="0" max="100" value={auditScore} onChange={(e) => setAuditScore(Number(e.target.value))} className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-300 mb-1">Audit Comment / Hash</label>
+                                    <textarea rows={3} value={auditComment} onChange={(e) => setAuditComment(e.target.value)} placeholder="Confirm verification status..." className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
+                                </div>
+                                <button onClick={submitAudit} disabled={submitting} className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
+                                    {submitting ? 'Submitting...' : 'Sign & Submit Audit'}
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-300 mb-1">Audit Comment / Hash</label>
-                            <textarea rows={3} value={auditComment} onChange={(e) => setAuditComment(e.target.value)} placeholder="Confirm verification status..." className="w-full bg-black border border-white/20 rounded p-2 text-white focus:border-purple-500 outline-none" />
-                        </div>
-                        <button onClick={submitAudit} disabled={submitting} className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-purple-900 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
-                            {submitting ? 'Submitting...' : 'Sign & Submit Audit'}
-                        </button>
                     </div>
-                </div>
-            </div>
-        )
-    }
+                )
+            }
 
-    {/* View Reports Modal (Read) */ }
-    {
-        viewProject && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setViewProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-                        <X size={20} />
-                    </button>
-                    <h3 className="text-xl font-bold text-white mb-2">Transparency Reports</h3>
-                    <p className="text-sm text-gray-400 mb-6">Audit history for <span className="text-blue-400">{viewProject.name}</span></p>
+            {/* View Reports Modal (Read) */}
+            {
+                viewProject && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                        <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                            <button onClick={() => setViewProject(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                            <h3 className="text-xl font-bold text-white mb-2">Transparency Reports</h3>
+                            <p className="text-sm text-gray-400 mb-6">Audit history for <span className="text-blue-400">{viewProject.name}</span></p>
 
-                    {loadingAudits ? (
-                        <div className="text-center py-8 text-gray-500">Fetching on-chain records...</div>
-                    ) : audits.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 bg-white/5 rounded-lg border border-dashed border-white/10">
-                            No reports submitted yet.
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {audits.map((a, i) => (
-                                <div key={i} className="glass-card p-4 border border-white/10 bg-black/20">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`text-lg font-bold ${a.score >= 80 ? 'text-green-400' : a.score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                                {a.score}/100
-                                            </span>
-                                            <span className="text-xs text-gray-500 px-2 py-0.5 bg-white/5 rounded">Trust Score</span>
-                                        </div>
-                                        <span className="text-xs text-gray-500 font-mono">
-                                            {new Date(Number(a.timestamp) * 1000).toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-300 text-sm whitespace-pre-wrap mb-3 pl-2 border-l-2 border-white/10">
-                                        {a.comment}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono border-t border-white/5 pt-2">
-                                        <span>Auditor:</span>
-                                        <span className="text-blue-400">{a.auditor}</span>
-                                    </div>
+                            {loadingAudits ? (
+                                <div className="text-center py-8 text-gray-500">Fetching on-chain records...</div>
+                            ) : audits.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500 bg-white/5 rounded-lg border border-dashed border-white/10">
+                                    No reports submitted yet.
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="space-y-4">
+                                    {audits.map((a, i) => (
+                                        <div key={i} className="glass-card p-4 border border-white/10 bg-black/20">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-lg font-bold ${a.score >= 80 ? 'text-green-400' : a.score >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                                        {a.score}/100
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 px-2 py-0.5 bg-white/5 rounded">Trust Score</span>
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-mono">
+                                                    {new Date(Number(a.timestamp) * 1000).toLocaleString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-300 text-sm whitespace-pre-wrap mb-3 pl-2 border-l-2 border-white/10">
+                                                {a.comment}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-xs text-gray-500 font-mono border-t border-white/5 pt-2">
+                                                <span>Auditor:</span>
+                                                <span className="text-blue-400">{a.auditor}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div>
-        )
-    }
+                    </div>
+                )
+            }
         </>
     );
 }
