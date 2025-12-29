@@ -43,7 +43,16 @@ export default function Navbar() {
                 {/* Wallet / Mobile Toggle */}
                 <div className="flex items-center gap-4">
                     {!account ? (
-                        <button onClick={connect} className="btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                        <button
+                            onClick={() => {
+                                if (typeof window !== 'undefined' && !(window as any).ethereum) {
+                                    alert('Wallet not detected. Please install MetaMask or another Web3 wallet.');
+                                } else {
+                                    connect();
+                                }
+                            }}
+                            className="btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"
+                        >
                             <Wallet size={16} /> Connect
                         </button>
                     ) : (

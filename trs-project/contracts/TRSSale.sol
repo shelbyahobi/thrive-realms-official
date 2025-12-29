@@ -44,26 +44,24 @@ contract TRSSale is ReentrancyGuard, Ownable {
         return currentPrice;
     }
 
+    function startSale() external onlyOwner {
+        require(!saleStarted, "Sale already started");
+        saleStarted = true;
+        saleStartTime = block.timestamp;
+        emit SaleStarted(saleStartTime);
+    }
+
     function buyTokens() public payable nonReentrant {
+        require(saleStarted, "Sale not started");
         require(!saleEnded, "Sale ended");
         require(msg.value > 0, "Send BNB");
 
-        // Trigger start on first buy
-        if (!saleStarted) {
-            saleStarted = true;
-            saleStartTime = block.timestamp;
-            emit SaleStarted(saleStartTime);
-        }
-
         uint256 price = getCurrentPrice();
         
-        // Check if we hit the cap
-        if (price >= MAX_PRICE && !saleEnded) {
-            saleEnded = true;
-            emit SaleEnded(block.timestamp, price);
-            require(price < MAX_PRICE, "Sale finished (Price reached Cap)");
-        }
-
+        // Check if we hit the cap logic
+        // If price is at MAX_PRICE, we just let them buy at MAX_PRICE until we decide to end it or supply runs out
+        // The previous logic REVERTED here, which was wrong.
+        
         uint256 amount = (msg.value * 10**18) / price; // Assuming 18 decimals
         require(amount > 0, "Too small BNB");
 
@@ -81,11 +79,13 @@ contract TRSSale is ReentrancyGuard, Ownable {
 
         emit TokensPurchased(msg.sender, amount, price);
     }
+
     function finalizeSale() external onlyOwner {
         require(!saleEnded, "Already ended");
         saleEnded = true;
         
-        // Recover unsold tokens to Treasury
+        // Recover unsold tokens to Treasury is NOT needed because tokens are PULLED from Treasury via transferFrom
+        // However, if the contract held any tokens itself (e.g. accidental sends), we can sweep them.
         uint256 balance = token.balanceOf(address(this));
         if (balance > 0) {
             token.transfer(treasury, balance);
