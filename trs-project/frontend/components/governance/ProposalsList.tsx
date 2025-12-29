@@ -135,7 +135,10 @@ export default function ProposalsList() {
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
+                <div>
+                    <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
+                    <p className="text-xs text-gray-500 font-mono mt-1">System v2.4 (24h Governance)</p>
+                </div>
                 <div className="flex gap-4 items-center">
                     <div className="bg-white/5 rounded-lg p-1 flex text-xs font-bold">
                         <button onClick={() => setFilter('all')} className={`px-3 py-1.5 rounded ${filter === 'all' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}>All</button>
