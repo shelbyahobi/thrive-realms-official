@@ -14,19 +14,33 @@ export default function ProposalDetailPage() {
     const [loading, setLoading] = useState(true);
     const [voting, setVoting] = useState(false);
     const [votingPower, setVotingPower] = useState('0');
+    const [snapshotPower, setSnapshotPower] = useState('0');
 
     useEffect(() => {
         if (provider && id) fetchProposalDetails();
-        if (account && provider) fetchVotingPower();
-    }, [provider, id, account]);
+    }, [provider, id]);
+
+    useEffect(() => {
+        if (account && provider && proposal?.snapshot) fetchVotingPower();
+    }, [account, provider, proposal]);
 
     async function fetchVotingPower() {
-        if (!account || !provider) return;
+        if (!account || !provider || !proposal) return;
         try {
             const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
-            const votes = await token.getVotes(account);
-            setVotingPower(formatEther(votes));
-        } catch (e) { console.error(e); }
+
+            // 1. Current Power (For Delegation Check)
+            const currentVotes = await token.getVotes(account);
+            setVotingPower(formatEther(currentVotes));
+
+            // 2. Snapshot Power (For this specific Proposal)
+            // Use read-only provider for history if needed, but browser provider works for recent blocks
+            // If snapshot is in future (impossible for active prop), fallback
+            if (proposal.snapshot > 0) {
+                const pastVotes = await token.getPastVotes(account, proposal.snapshot);
+                setSnapshotPower(formatEther(pastVotes));
+            }
+        } catch (e) { console.error("Vote Fetch Error", e); }
     }
 
     async function delegate() {
@@ -83,6 +97,7 @@ export default function ProposalDetailPage() {
             const args = (foundEvent as any).args;
             const state = await gov.state(args[0]);
             const votes = await gov.proposalVotes(args[0]);
+            const snapshot = await gov.proposalSnapshot(args[0]);
 
             setProposal({
                 id: args[0].toString(),
@@ -94,7 +109,8 @@ export default function ProposalDetailPage() {
                 abstainVotes: formatEther(votes[2]),
                 targets: args[2],
                 values: args[3],
-                calldatas: args[4]
+                calldatas: args[4],
+                snapshot: Number(snapshot)
             });
 
             if (Number(state) === 5) { // Queued
