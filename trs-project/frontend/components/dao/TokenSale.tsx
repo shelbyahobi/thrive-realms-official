@@ -16,12 +16,20 @@ export default function TokenSale() {
     }, [provider]);
 
     async function fetchPrice() {
-        if (!provider) return;
+        if (!provider) {
+            console.log("Waiting for provider to load...");
+            return;
+        }
         try {
             const sale = new ethers.Contract(CONTRACT_ADDRESSES.SALE, CONTRACT_ABIS.TRSSale, provider);
             const p = await sale.getCurrentPrice();
             setPrice(formatEther(p));
-        } catch (e) { console.error(e); }
+            console.log("Fetched Price:", formatEther(p));
+        } catch (e: any) {
+            console.error("Price Fetch Error:", e);
+            // Optionally set a fallback or error state UI
+            setPrice("Error");
+        }
     }
 
     // Calc expected output
@@ -86,14 +94,17 @@ export default function TokenSale() {
     return (
         <div className="glass-card p-6 bg-gradient-to-br from-purple-900/20 to-black border border-purple-500/30">
             <h3 className="text-xl font-bold mb-4 text-white">Buy TRS Tokens</h3>
-            <div className="flex justify-between text-sm mb-4">
+            <div className="flex justify-between items-center text-sm mb-4">
                 <span className="text-gray-400">Current Price:</span>
-                <span className="text-purple-400 font-mono">{price} BNB</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-purple-400 font-mono">{price === '0' ? 'Loading...' : price} tBNB</span>
+                    <button onClick={fetchPrice} className="text-gray-500 hover:text-white" title="Refresh Price">↻</button>
+                </div>
             </div>
 
             <div className="space-y-4">
                 <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold">Amount (BNB)</label>
+                    <label className="text-xs text-gray-500 uppercase font-bold">Amount (tBNB)</label>
                     <input
                         type="number"
                         value={buyAmount}
