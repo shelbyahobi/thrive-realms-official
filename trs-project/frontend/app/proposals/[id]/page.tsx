@@ -15,6 +15,7 @@ export default function ProposalDetailPage() {
     const [voting, setVoting] = useState(false);
     const [votingPower, setVotingPower] = useState('0');
     const [snapshotPower, setSnapshotPower] = useState('0');
+    const [currentBlock, setCurrentBlock] = useState<number>(0);
 
     useEffect(() => {
         if (provider && id) fetchProposalDetails();
@@ -34,9 +35,14 @@ export default function ProposalDetailPage() {
             setVotingPower(formatEther(currentVotes));
 
             // 2. Snapshot Power (For this specific Proposal)
-            // Use read-only provider for history if needed, but browser provider works for recent blocks
-            // If snapshot is in future (impossible for active prop), fallback
-            if (proposal.snapshot > 0) {
+            const latest = await provider.getBlockNumber();
+            setCurrentBlock(latest);
+
+            if (proposal.snapshot > latest) {
+                // Future/Pending: Use Current Power as prediction
+                setSnapshotPower(formatEther(currentVotes));
+            } else {
+                // Active/Past: Use Historical Power
                 const pastVotes = await token.getPastVotes(account, proposal.snapshot);
                 setSnapshotPower(formatEther(pastVotes));
             }
@@ -277,52 +283,56 @@ export default function ProposalDetailPage() {
                 )}
 
                 {/* Voting Actions */}
-                {proposal.state === 1 && account && (
+                {account && (
                     <div className="glass-card p-6 border-l-4 border-blue-500">
                         <h3 className="font-bold mb-4">Cast Your Vote</h3>
 
-                        {Number(snapshotPower) > 0 ? (
-                            <div className="space-y-2">
-                                <p className="text-xs text-green-400 mb-2 font-mono">
-                                    Eligible Voting Power: {Number(snapshotPower).toLocaleString()} TRS
-                                </p>
-                                <button onClick={() => castVote(1)} disabled={voting} className="btn w-full bg-green-900/40 hover:bg-green-800/60 text-green-400 border border-green-500/30 py-3 flex items-center justify-center gap-2">
-                                    <CheckCircle size={18} /> Vote For
-                                </button>
-                                <button onClick={() => castVote(0)} disabled={voting} className="btn w-full bg-red-900/40 hover:bg-red-800/60 text-red-400 border border-red-500/30 py-3 flex items-center justify-center gap-2">
-                                    <XCircle size={18} /> Vote Against
-                                </button>
-                                <button onClick={() => castVote(2)} disabled={voting} className="btn w-full bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600/30 py-3 flex items-center justify-center gap-2">
-                                    <MinusCircle size={18} /> Abstain
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
-                                <div className="flex items-center gap-2 text-yellow-500 font-bold mb-2">
-                                    <AlertTriangle size={18} /> Ineligible to Vote
+                        {/* State 0: PENDING */}
+                        {proposal.state === 0 && (
+                            <div className="bg-blue-900/20 p-4 rounded border border-blue-500/30 mb-4">
+                                <div className="flex items-center gap-2 text-blue-400 font-bold mb-2">
+                                    <Clock size={16} /> Voting Starts Soon
                                 </div>
-                                <p className="text-gray-400 text-sm mb-4">
-                                    {Number(votingPower) > 0 ? (
-                                        <span>
-                                            You currently have <strong>{Number(votingPower).toLocaleString()} Voting Power</strong>, BUT you had <strong>0 Power</strong> at the time this proposal was created (Snapshot Block #{proposal.snapshot}).
-                                            <br /><br />
-                                            This means you acquired tokens or delegated <em>after</em> the proposal started. You will be able to vote on <strong>future</strong> proposals.
-                                        </span>
-                                    ) : (
-                                        <span>
-                                            You have 0 Voting Power. You must <strong>Delegate</strong> tokens to yourself to activate power.
-                                        </span>
-                                    )}
+                                <p className="text-gray-400 text-sm">
+                                    Voting begins at <strong>Block #{proposal.snapshot}</strong>. <br />
+                                    (Current Block: #{currentBlock} - Dest: ~{Math.max(0, proposal.snapshot - currentBlock)} blocks)
                                 </p>
-                                {Number(votingPower) === 0 && (
-                                    <button
-                                        onClick={delegate}
-                                        className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
-                                    >
-                                        Activate Voting Power
-                                    </button>
-                                )}
+                                <p className="text-gray-500 text-xs mt-2 italic">
+                                    You have <strong>{Number(votingPower).toLocaleString()} VP</strong> ready.
+                                </p>
                             </div>
+                        )}
+
+                        {/* State 1: ACTIVE */}
+                        {proposal.state === 1 && (
+                            <>
+                                {Number(snapshotPower) > 0 ? (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-green-400 mb-2 font-mono">
+                                            Eligible Voting Power: {Number(snapshotPower).toLocaleString()} TRS
+                                        </p>
+                                        <button onClick={() => castVote(1)} disabled={voting} className="btn w-full bg-green-900/40 hover:bg-green-800/60 text-green-400 border border-green-500/30 py-3 flex items-center justify-center gap-2">
+                                            <CheckCircle size={18} /> Vote For
+                                        </button>
+                                        <button onClick={() => castVote(0)} disabled={voting} className="btn w-full bg-red-900/40 hover:bg-red-800/60 text-red-400 border border-red-500/30 py-3 flex items-center justify-center gap-2">
+                                            <XCircle size={18} /> Vote Against
+                                        </button>
+                                        <button onClick={() => castVote(2)} disabled={voting} className="btn w-full bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600/30 py-3 flex items-center justify-center gap-2">
+                                            <MinusCircle size={18} /> Abstain
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
+                                        {/* Ineligible Warning (Existing Logic) */}
+                                        <div className="flex items-center gap-2 text-yellow-500 font-bold mb-2">
+                                            <AlertTriangle size={18} /> Ineligible to Vote
+                                        </div>
+                                        <p className="text-gray-400 text-sm mb-4">
+                                            You currently have <strong>{Number(votingPower).toLocaleString()} Voting Power</strong>, BUT you had <strong>0 Power</strong> at the snapshot (Block #{proposal.snapshot}).
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 )}

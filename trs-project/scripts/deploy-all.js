@@ -11,6 +11,10 @@ async function main() {
     await token.waitForDeployment();
     console.log("TRSToken deployed to:", token.target);
 
+    // 1b. Auto-Delegate to Deployer (Fixes "0 Snapshot Power" issue for Admin)
+    await (await token.delegate(deployer.address)).wait();
+    console.log("Auto-Delegated Voting Power to Deployer");
+
     // 2. Deploy Timelock (minDelay = 0 for dev)
     const Timelock = await hre.ethers.getContractFactory("TRSTimelock");
     const minDelay = 0;
