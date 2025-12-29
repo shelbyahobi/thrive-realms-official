@@ -43,10 +43,19 @@ export default function TokenSale() {
     }, [buyAmount, price]);
 
     async function buyTokens() {
-        if (!signer || !buyAmount) return;
+        if (!signer) {
+            alert("Please connect your wallet via the 'Connect Wallet' button first.");
+            return;
+        }
+        if (!buyAmount || parseFloat(buyAmount) <= 0) {
+            alert("Please enter a valid amount of BNB.");
+            return;
+        }
+
         setLoading(true);
         setStatus("Processing transaction...");
         try {
+            console.log("Buying tokens with", buyAmount, "BNB");
             const sale = new ethers.Contract(CONTRACT_ADDRESSES.SALE, CONTRACT_ABIS.TRSSale, signer);
             // Manual gas limit to bypass estimation errors (often implies revert scenarios like Wallet Limit)
             // Increased to 800,000 to cover any complexity
@@ -54,15 +63,19 @@ export default function TokenSale() {
             await tx.wait();
             setStatus("Success! Tokens purchased.");
             setBuyAmount('');
+            alert("Tokens purchased successfully! Refreshing...");
             window.location.reload(); // Refresh to show new balance
         } catch (e: any) {
-            console.error(e);
+            console.error("Buy Error:", e);
             if (e.code === 'ACTION_REJECTED') {
                 setStatus("Transaction rejected by user.");
-            } else if (e.message.includes("insufficient funds")) {
+                alert("You rejected the transaction.");
+            } else if (e.message && e.message.includes("insufficient funds")) {
                 setStatus("Error: Insufficient BNB for value + gas.");
+                alert("Insufficient BNB in your wallet.");
             } else {
                 setStatus("Failed: " + (e.reason || e.message || "Unknown Error"));
+                alert("Transaction Failed. Check console for details.");
             }
         }
         setLoading(false);
