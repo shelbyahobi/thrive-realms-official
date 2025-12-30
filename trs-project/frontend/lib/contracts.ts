@@ -2,7 +2,7 @@ import TRSTokenArtifact from '../app/abi/TRSToken.json';
 import TRSSaleArtifact from '../app/abi/TRSSale.json';
 import TRSGovernorArtifact from '../app/abi/TRSGovernor.json';
 import DividendVaultArtifact from '../app/abi/DividendVault.json';
-import ProjectRegistryArtifact from '../app/abi/ExecutionRegistry.json'; // Aliased for legacy compat, or use ExecutionRegistry export
+import ExecutionRegistryArtifact from "../../artifacts/contracts/ExecutionRegistry.sol/ExecutionRegistry.json"; // Fresh Phase 4 ABI
 import OpportunityRegistryArtifact from "../../artifacts/contracts/OpportunityRegistry.sol/OpportunityRegistry.json";
 import ProjectFactoryArtifact from "../../artifacts/contracts/ProjectFactory.sol/ProjectFactory.json";
 import ProjectEscrowArtifact from "../../artifacts/contracts/ProjectEscrow.sol/ProjectEscrow.json";
@@ -40,12 +40,12 @@ export const CONTRACT_ABIS = {
     TRSSale: TRSSaleArtifact.abi,
     TRSGovernor: TRSGovernorArtifact.abi,
     DividendVault: DividendVaultArtifact.abi,
-    ExecutionRegistry: ProjectRegistryArtifact.abi, // Using ExecutionRegistry ABI
+    ExecutionRegistry: ExecutionRegistryArtifact.abi, // Using Fresh ExecutionRegistry ABI
     OpportunityRegistry: OpportunityRegistryArtifact.abi,
     ProjectFactory: ProjectFactoryArtifact.abi,
     ProjectEscrow: ProjectEscrowArtifact.abi,
     PolicyRegistry: PolicyRegistryArtifact.abi,
     ReputationRegistry: ReputationRegistryArtifact.abi,
     RevenueRouter: RevenueRouterArtifact.abi,
-    RevenueRouter: RevenueRouterArtifact.abi
+
 };
