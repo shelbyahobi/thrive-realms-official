@@ -1,0 +1,205 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ReputationRegistry",
+  "sourceName": "contracts/ReputationRegistry.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "status",
+          "type": "bool"
+        }
+      ],
+      "name": "CallerAuthorized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "newScore",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "delta",
+          "type": "int256"
+        }
+      ],
+      "name": "ScoreUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "authorizedCallers",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_executor",
+          "type": "address"
+        }
+      ],
+      "name": "getScore",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "scores",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_caller",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "_status",
+          "type": "bool"
+        }
+      ],
+      "name": "setAuthorizedCaller",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_executor",
+          "type": "address"
+        },
+        {
+          "internalType": "int256",
+          "name": "_delta",
+          "type": "int256"
+        }
+      ],
+      "name": "updateScore",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461006f5760008054336001600160a01b0319821681178355604092916001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a3338152600260205220805460ff1916600117905561048090816100758239f35b600080fdfe604060808152600436101561001357600080fd5b600090813560e01c8063454bbd2914610356578063536fff6c14610319578063715018a6146102bc57806376dd110f1461013a5780637f3d7ffa146101985780638da5cb5b14610171578063d47875d01461013a5763f2fde38b1461007757600080fd5b34610136576020366003190112610136576100906103d7565b6100986103f2565b6001600160a01b039081169182156100e4575082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b5162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b5080fd5b50346101365760203660031901126101365760209181906001600160a01b036101616103d7565b1681526001845220549051908152f35b5034610136578160031936011261013657905490516001600160a01b039091168152602090f35b50346101365780600319360112610136576101b16103d7565b9060243591338452600260205260ff828520541680156102a9575b15610274576001600160a01b031680845260016020528184205490928082019181831280159187139182169115161761026057907fcd7edb2278e64b13be35bfc059779a38067d4d21be38e1d1dbdefc88ed3021ed929160648213610257575b85821261024f575b8486526001602052818387205582519182526020820152a280f35b859150610234565b6064915061022c565b634e487b7160e01b85526011600452602485fd5b815162461bcd60e51b815260206004820152600e60248201526d139bdd08105d5d1a1bdc9a5e995960921b6044820152606490fd5b5083546001600160a01b031633146101cc565b82346103165780600319360112610316576102d56103f2565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b50346101365760203660031901126101365760209160ff9082906001600160a01b036103436103d7565b1681526002855220541690519015158152f35b503461013657806003193601126101365761036f6103d7565b602435908115158092036103d3577f100c9fd652c7b273c9266f92f22ac2352eb8d7232013ac0439e9066a9227f369916020916103aa6103f2565b6001600160a01b031680865260028352848620805460ff191660ff84161790559351908152a280f35b8380fd5b600435906001600160a01b03821682036103ed57565b600080fd5b6000546001600160a01b0316330361040657565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fdfea2646970667358221220769e7be17b81ca3b79d2c3608aec87ca5d723cbc6956570d1f6d2f60e5a6184164736f6c63430008140033",
+  "deployedBytecode": "0x604060808152600436101561001357600080fd5b600090813560e01c8063454bbd2914610356578063536fff6c14610319578063715018a6146102bc57806376dd110f1461013a5780637f3d7ffa146101985780638da5cb5b14610171578063d47875d01461013a5763f2fde38b1461007757600080fd5b34610136576020366003190112610136576100906103d7565b6100986103f2565b6001600160a01b039081169182156100e4575082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b5162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b5080fd5b50346101365760203660031901126101365760209181906001600160a01b036101616103d7565b1681526001845220549051908152f35b5034610136578160031936011261013657905490516001600160a01b039091168152602090f35b50346101365780600319360112610136576101b16103d7565b9060243591338452600260205260ff828520541680156102a9575b15610274576001600160a01b031680845260016020528184205490928082019181831280159187139182169115161761026057907fcd7edb2278e64b13be35bfc059779a38067d4d21be38e1d1dbdefc88ed3021ed929160648213610257575b85821261024f575b8486526001602052818387205582519182526020820152a280f35b859150610234565b6064915061022c565b634e487b7160e01b85526011600452602485fd5b815162461bcd60e51b815260206004820152600e60248201526d139bdd08105d5d1a1bdc9a5e995960921b6044820152606490fd5b5083546001600160a01b031633146101cc565b82346103165780600319360112610316576102d56103f2565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b50346101365760203660031901126101365760209160ff9082906001600160a01b036103436103d7565b1681526002855220541690519015158152f35b503461013657806003193601126101365761036f6103d7565b602435908115158092036103d3577f100c9fd652c7b273c9266f92f22ac2352eb8d7232013ac0439e9066a9227f369916020916103aa6103f2565b6001600160a01b031680865260028352848620805460ff191660ff84161790559351908152a280f35b8380fd5b600435906001600160a01b03821682036103ed57565b600080fd5b6000546001600160a01b0316330361040657565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fdfea2646970667358221220769e7be17b81ca3b79d2c3608aec87ca5d723cbc6956570d1f6d2f60e5a6184164736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -2,13 +2,13 @@ import TRSTokenArtifact from '../app/abi/TRSToken.json';
 import TRSSaleArtifact from '../app/abi/TRSSale.json';
 import TRSGovernorArtifact from '../app/abi/TRSGovernor.json';
 import DividendVaultArtifact from '../app/abi/DividendVault.json';
-import ExecutionRegistryArtifact from "../../artifacts/contracts/ExecutionRegistry.sol/ExecutionRegistry.json"; // Fresh Phase 4 ABI
-import OpportunityRegistryArtifact from "../../artifacts/contracts/OpportunityRegistry.sol/OpportunityRegistry.json";
-import ProjectFactoryArtifact from "../../artifacts/contracts/ProjectFactory.sol/ProjectFactory.json";
-import ProjectEscrowArtifact from "../../artifacts/contracts/ProjectEscrow.sol/ProjectEscrow.json";
-import PolicyRegistryArtifact from "../../artifacts/contracts/PolicyRegistry.sol/PolicyRegistry.json";
-import ReputationRegistryArtifact from "../../artifacts/contracts/ReputationRegistry.sol/ReputationRegistry.json";
-import RevenueRouterArtifact from "../../artifacts/contracts/RevenueRouter.sol/RevenueRouter.json";
+import ExecutionRegistryArtifact from '../app/abi/ExecutionRegistry.json';
+import OpportunityRegistryArtifact from "../app/abi/OpportunityRegistry.json";
+import ProjectFactoryArtifact from "../app/abi/ProjectFactory.json";
+import ProjectEscrowArtifact from "../app/abi/ProjectEscrow.json";
+import PolicyRegistryArtifact from "../app/abi/PolicyRegistry.json";
+import ReputationRegistryArtifact from "../app/abi/ReputationRegistry.json";
+import RevenueRouterArtifact from "../app/abi/RevenueRouter.json";
 
 // Deployed on BSC Testnet (TRSSale Logic Fixed)
 export const CONTRACT_ADDRESSES = {
