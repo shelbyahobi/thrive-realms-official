@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import { useWallet } from '../../../hooks/useWallet';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../../lib/contracts';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FileText, Plus, Trash, AlertTriangle, ChevronRight, ChevronLeft, CheckCircle, ShieldCheck, Building2, Wallet, Users, Globe, Briefcase, DollarSign } from 'lucide-react';
+import { FileText, Plus, Trash, AlertTriangle, ChevronRight, ChevronLeft, CheckCircle, ShieldCheck, Building2, Wallet, Users, Globe, Briefcase, DollarSign, Banknote } from 'lucide-react';
 
 const CATEGORIES = [
     "Treasury Investment", "Execution Entity Approval", "Job / Contractor Engagement",
