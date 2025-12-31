@@ -86,8 +86,17 @@ contract ProjectFactory {
             _budgetToken.safeTransferFrom(msg.sender, address(newProject), totalBudget);
         }
 
+        // --- REPUTATION CHECKS (Phase 4) ---
+        // We check eligibility purely for on-chain tracking/events in this MVP.
+        // Future upgrades can use this bool to bypass limits.
+        // Using "0" as generic type ID for now (Standard Project).
+        bool isFastTrack = reputationRegistry.isFastTrackEligible(_executor, 0); 
+        
         emit ProjectCreated(address(newProject), _projectId, _executor, totalBudget);
+        emit FastTrackStatus(address(newProject), isFastTrack);
 
         return address(newProject);
     }
+
+    event FastTrackStatus(address indexed project, bool isFastTrack);
 }

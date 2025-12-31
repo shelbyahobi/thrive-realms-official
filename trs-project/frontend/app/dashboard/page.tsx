@@ -9,8 +9,8 @@ import DividendDashboard from '../../components/dao/DividendDashboard';
 import TreasuryWidget from '../../components/dashboard/TreasuryWidget';
 import ActiveProposalsWidget from '../../components/dashboard/ActiveProposalsWidget';
 import ActionCenterWidget from '../../components/dashboard/ActionCenterWidget';
-import ExecutorStatusWidget from '../../components/dashboard/ExecutorStatusWidget'; // [PHASE 3] New
-import PolicyHealthWidget from '../../components/dashboard/PolicyHealthWidget';     // [PHASE 3] New
+import ReputationWidget from '../../components/dashboard/ReputationWidget'; // [PHASE 4] New Expert System
+import PolicyHealthWidget from '../../components/dashboard/PolicyHealthWidget';     // [PHASE 4] New
 import FoundingPlaybookWidget from '../../components/dashboard/FoundingPlaybookWidget';
 import CommunityStatsWidget from '../../components/dashboard/CommunityStatsWidget';
 import { Shield, Sparkles } from 'lucide-react';
@@ -75,8 +75,8 @@ export default function Dashboard() {
                     <p className="text-2xl font-mono text-white truncate" title={balance}>{parseFloat(balance).toLocaleString()} TRS</p>
                 </div>
 
-                {/* 2. Executor Status (Unified Reputation) */}
-                <ExecutorStatusWidget />
+                {/* 2. Reputation Score (Unified Expert System) */}
+                <ReputationWidget />
 
                 {/* 2.5 Policy Health (Unified Governance) */}
                 <PolicyHealthWidget />

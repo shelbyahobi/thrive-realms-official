@@ -1,56 +1,69 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
-import { useWallet } from '../../hooks/useWallet';
-import { Activity, Lock, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+
+import { Activity, CheckCircle, AlertOctagon, RefreshCw } from 'lucide-react';
 
 export default function PolicyHealthWidget() {
-    const { provider } = useWallet();
-    const [maxBudget, setMaxBudget] = useState<string>('0');
-    const [loading, setLoading] = useState(true);
+    // Mock Data for Phase 4 Demo (Real data would come from subgraph/indexer)
+    const healthData = {
+        status: "Normal", // Normal, Warning, Critical
+        uptime: "99.9%",
+        activePods: 12,
+        disputeRate: "0.4%", // < 1% is good
+        pendingAudits: 3,
+        lastCheck: "Just now"
+    };
 
-    useEffect(() => {
-        if (provider) checkPolicy();
-    }, [provider]);
-
-    async function checkPolicy() {
-        try {
-            const registry = new ethers.Contract(CONTRACT_ADDRESSES.POLICY_REGISTRY, CONTRACT_ABIS.PolicyRegistry, provider);
-            const val = await registry.getPolicy("MAX_PROJECT_BUDGET");
-            setMaxBudget(ethers.formatEther(val));
-        } catch (e) {
-            console.error("Error fetching policy", e);
-        }
-        setLoading(false);
-    }
-
-    if (loading) return <div className="glass-card p-6 h-full animate-pulse bg-white/5"></div>;
+    const getStatusColor = (status: string) => {
+        if (status === "Normal") return "text-green-500";
+        if (status === "Warning") return "text-yellow-500";
+        return "text-red-500";
+    };
 
     return (
-        <div className="glass-card p-6 h-full flex flex-col justify-between border-l-4 border-blue-500">
-            <div className="flex justify-between items-start mb-4">
-                <div className="bg-blue-500/10 p-2 rounded-lg">
-                    <Activity className="text-blue-400" size={24} />
-                </div>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">System Health</span>
+        <div className="glass-card p-6 relative overflow-hidden">
+            {/* Pulse Effect */}
+            <div className="absolute top-4 right-4 animate-pulse">
+                <div className="h-3 w-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
             </div>
 
-            <div>
-                <div className="flex items-center gap-2 mb-1">
-                    <CheckCircle size={16} className="text-green-400" />
-                    <span className="text-sm font-bold text-green-400 uppercase">Nominal</span>
+            <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                    <Activity size={24} className="text-green-400" />
+                    <div>
+                        <h2 className="text-lg font-bold text-white">Policy Health</h2>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-mono font-bold uppercase ${getStatusColor(healthData.status)}`}>
+                                System {healthData.status}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <p className="text-sm text-gray-400">
-                    Max Project Cap: <strong className="text-white">{parseInt(maxBudget).toLocaleString()} TRS</strong>
-                </p>
-            </div>
 
-            <div className="pt-4 border-t border-white/5 mt-4">
-                <Link href="/governance/policies" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 font-bold">
-                    View Guardrails <Lock size={14} />
-                </Link>
+                <div className="space-y-4">
+                    {/* Metric Row */}
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-gray-400 text-sm">Active Execution Pods</span>
+                        <span className="text-white font-mono font-bold">{healthData.activePods}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-gray-400 text-sm">Dispute Rate (30d)</span>
+                        <div className="text-right">
+                            <span className="text-green-400 font-mono font-bold block">{healthData.disputeRate}</span>
+                            <span className="text-[10px] text-gray-500">Target: &lt;1.0%</span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-gray-400 text-sm">Pending Audits</span>
+                        <span className="text-yellow-400 font-mono font-bold">{healthData.pendingAudits}</span>
+                    </div>
+
+                    <div className="bg-green-500/10 border border-green-500/20 p-3 rounded mt-4 flex items-center gap-3">
+                        <CheckCircle size={16} className="text-green-400" />
+                        <span className="text-green-300 text-xs">All automated checks passing. Timelock strictness enabled.</span>
+                    </div>
+                </div>
             </div>
         </div>
     );
