@@ -241,48 +241,25 @@ export default function ProposalsList() {
             )}
 
             <div className="space-y-4">
-                {filteredProposals.map(p => {
-                    const desc = p.description || "";
-                    const titleMatch = desc.match(/^#\s+(.+)$/m);
-                    const title = titleMatch ? titleMatch[1] : `Proposal #${p.id.substring(0, 6)}...`;
-
-                    // Clean summary: Remove Title, Remove Markdown Tables (lines starting with |), Remove Headers
-                    let summary = desc
-                        .replace(/^#\s+.+$/m, '') // Remove Title
-                        .replace(/^\|.*$/gm, '')  // Remove Table Rows
-                        .replace(/^\s*[\-\*]{3,}\s*$/gm, '') // Remove HR
-                        .replace(/#+/g, '') // Remove Header hashes
-                        .trim()
-                        .substring(0, 150) + "...";
-
-                    return (
-                        <Link href={`/proposals/${p.id}`} key={p.id} className="block glass-card hover:border-purple-500/50 transition duration-200 group">
-                            <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">{title}</h3>
-                                <span className={`px-3 py-1 rounded text-xs font-bold ${p.state === 1 ? 'bg-green-500/20 text-green-400' :
-                                    p.state === 4 ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-700 text-gray-300'
-                                    }`}>
-                                    {ProposalState[p.state]}
-                                </span>
-                            </div>
-                            <p className="text-gray-400 text-sm mb-4 font-mono opacity-70">{summary}</p>
-                            <div className="grid grid-cols-3 gap-4 text-center text-xs bg-black/40 p-3 rounded border border-white/5">
-                                <div>
-                                    <span className="block text-green-400 font-bold text-lg">{parseFloat(p.forVotes).toLocaleString()}</span>
-                                    <span className="text-gray-500 uppercase tracking-wider">For</span>
-                                </div>
-                                <div>
-                                    <span className="block text-red-400 font-bold text-lg">{parseFloat(p.againstVotes).toLocaleString()}</span>
-                                    <span className="text-gray-500 uppercase tracking-wider">Against</span>
-                                </div>
-                                <div>
-                                    <span className="block text-gray-400 font-bold text-lg">{parseFloat(p.abstainVotes).toLocaleString()}</span>
-                                    <span className="text-gray-500 uppercase tracking-wider">Abstain</span>
-                                </div>
-                            </div>
-                        </Link>
-                    );
                 })}
+
+                {(!loading || scanStatus) && (
+                    <div className="text-center pt-8 border-t border-white/10">
+                        <p className="text-xs text-gray-500 mb-4">
+                            Scanned history up to block {oldestBlockScanned > 0 ? oldestBlockScanned.toLocaleString() : "current"}
+                        </p>
+                        <button
+                            onClick={() => fetchProposals(true)}
+                            disabled={loading}
+                            className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 font-bold transition-all text-center mx-auto block"
+                        >
+                            {loading ? <span className="flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> {scanStatus || "Scanning..."}</span> : "Load Deeper History (7 Days)"}
+                        </button>
+                        <p className="text-xs text-gray-600 mt-2">
+                            Don't see your proposal? Use this to look further back in time.
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );
