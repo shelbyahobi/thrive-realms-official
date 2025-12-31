@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+/**
+ * @title GovernanceSettings
+ * @notice Stores global DAO configuration and state phases.
+ * @dev Owned by the Timelock controller.
+ */
+contract GovernanceSettings is Ownable {
+    
+    enum DaoPhase { 
+        SETUP, 
+        LEGAL_STRUCTURE_APPROVED, 
+        FUNDED,
+        OPERATIONAL 
+    }
+
+    enum EntityType { 
+        DAO_LLC, 
+        FOUNDATION_SUBSIDIARY, 
+        HYBRID_WRAPPER, 
+        EXPLORATORY 
+    }
+
+    enum ControlModel { 
+        MULTISIG, 
+        TIMELOCK, 
+        HYBRID 
+    }
+
+    struct LegalStructure {
+        EntityType structureType;
+        string jurisdiction;
+        string[] scope; // E.g., "Hold equity", "Sign contracts"
+        ControlModel controlModel;
+        uint256 setupBudget;
+        address facilitator;
+        uint256 approvedAt;
+    }
+
+    // State
+    DaoPhase public currentPhase;
+    LegalStructure public legalStructure;
+
+    // Events
+    event PhaseUpdated(DaoPhase oldPhase, DaoPhase newPhase);
+    event LegalStructureApproved(
+        EntityType structureType, 
+        string jurisdiction, 
+        uint256 budget,
+        address facilitator
+    );
+
+    constructor() Ownable() {
+        currentPhase = DaoPhase.SETUP;
+    }
+
+    /**
+     * @notice Locks in the Legal Structure choice and advances phase.
+     * @dev Accessible only by Owner (Timelock).
+     */
+    function setLegalStructure(
+        EntityType _structureType,
+        string memory _jurisdiction,
+        string[] memory _scope,
+        ControlModel _controlModel,
+        uint256 _setupBudget,
+        address _facilitator
+    ) external onlyOwner {
+        require(currentPhase == DaoPhase.SETUP, "Phase already advanced");
+
+        legalStructure = LegalStructure({
+            structureType: _structureType,
+            jurisdiction: _jurisdiction,
+            scope: _scope,
+            controlModel: _controlModel,
+            setupBudget: _setupBudget,
+            facilitator: _facilitator,
+            approvedAt: block.timestamp
+        });
+
+        _setPhase(DaoPhase.LEGAL_STRUCTURE_APPROVED);
+
+        emit LegalStructureApproved(_structureType, _jurisdiction, _setupBudget, _facilitator);
+    }
+
+    /**
+     * @notice Manually update phase if needed (Emergency/Adjustment).
+     */
+    function setPhase(DaoPhase _newPhase) external onlyOwner {
+        _setPhase(_newPhase);
+    }
+
+    function _setPhase(DaoPhase _newPhase) internal {
+        DaoPhase oldPhase = currentPhase;
+        currentPhase = _newPhase;
+        emit PhaseUpdated(oldPhase, _newPhase);
+    }
+
+    function getLegalStructure() external view returns (LegalStructure memory) {
+        return legalStructure;
+    }
+}

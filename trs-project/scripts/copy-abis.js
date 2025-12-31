@@ -15,7 +15,8 @@ const CONTRACTS = [
     'TRSToken.sol/TRSToken.json',
     'TRSSale.sol/TRSSale.json',
     'TRSGovernor.sol/TRSGovernor.json',
-    'DividendVault.sol/DividendVault.json'
+    'DividendVault.sol/DividendVault.json',
+    'GovernanceSettings.sol/GovernanceSettings.json'
 ];
 
 if (!fs.existsSync(FRONTEND_ABI_DIR)) {

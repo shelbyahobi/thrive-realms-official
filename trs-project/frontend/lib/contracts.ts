@@ -9,6 +9,7 @@ import ProjectEscrowArtifact from "../app/abi/ProjectEscrow.json";
 import PolicyRegistryArtifact from "../app/abi/PolicyRegistry.json";
 import ReputationRegistryArtifact from "../app/abi/ReputationRegistry.json";
 import RevenueRouterArtifact from "../app/abi/RevenueRouter.json";
+import GovernanceSettingsArtifact from "../app/abi/GovernanceSettings.json";
 
 // Deployed on BSC Testnet (TRSSale Logic Fixed)
 export const CONTRACT_ADDRESSES = {
@@ -16,6 +17,7 @@ export const CONTRACT_ADDRESSES = {
     TOKEN: "0x2cEA540eDe529bf794C5555061CE963517d11DdA",
     TIMELOCK: "0x95Ff3eB798e2970E471C888fb095C496D67D7a5E",
     GOVERNOR: "0x94eeA841bb375d90f0eaD499aD4191A0F8d47C9B",
+    GOVERNANCE_SETTINGS: "0xC16A592f0C69D29306026f4B1b5b97Dc7c2E0122", // MVP Governance State
 
     // Functional
     SALE: "0x72F534A7dB15947F351eFc35b2D1e979D1156F81",
@@ -47,5 +49,6 @@ export const CONTRACT_ABIS = {
     PolicyRegistry: PolicyRegistryArtifact.abi,
     ReputationRegistry: ReputationRegistryArtifact.abi,
     RevenueRouter: RevenueRouterArtifact.abi,
+    GovernanceSettings: GovernanceSettingsArtifact.abi,
 
 };

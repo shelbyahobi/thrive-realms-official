@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import { useWallet } from '../../../hooks/useWallet';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../../lib/contracts';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FileText, Plus, Trash, AlertTriangle, ChevronRight, ChevronLeft, CheckCircle, ShieldCheck, Building2, Wallet, Users, Globe, Briefcase, DollarSign, Banknote } from 'lucide-react';
+import { FileText, Plus, Trash, AlertTriangle, ChevronRight, ChevronLeft, CheckCircle, ShieldCheck, Building2, Wallet, Users, Globe, Briefcase, DollarSign, Banknote, Scale } from 'lucide-react';
 
 const CATEGORIES = [
     "Treasury Investment", "Execution Entity Approval", "Job / Contractor Engagement",
@@ -16,7 +16,7 @@ const CATEGORIES = [
 const EXECUTION_MODELS = ["Approved Company", "Approved Individual", "Internal DAO Execution"];
 
 // Proposal Types mapped to User's Architecture
-type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD';
+type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD' | 'LEGAL_STRUCTURE';
 
 function NewProposalContent() {
     const { provider, signer, account } = useWallet();
@@ -49,6 +49,14 @@ function NewProposalContent() {
     const [oppMarket, setOppMarket] = useState('');
     const [oppRegion, setOppRegion] = useState('');
     const [oppContact, setOppContact] = useState('');
+
+    // Phase 1: Legal Structure
+    const [legalType, setLegalType] = useState('DAO-Controlled LLC');
+    const [legalJurisdiction, setLegalJurisdiction] = useState('Wyoming (DAO-LLC)');
+    const [legalScope, setLegalScope] = useState<string[]>([]);
+    const [legalControl, setLegalControl] = useState('Multisig');
+    const [legalBudget, setLegalBudget] = useState('');
+    const [legalFacilitator, setLegalFacilitator] = useState('');
 
     useEffect(() => {
         if (provider && account) {
@@ -125,6 +133,12 @@ function NewProposalContent() {
             desc: "Spin up a dedicated sub-DAO (Pod) for specific geographic/sector mandates.",
             icon: <Users size={32} />,
             color: "pink"
+        },
+        'LEGAL_STRUCTURE': {
+            title: "Legal Structure Establishment",
+            desc: "Define the legal entity, jurisdiction, and control model for the DAO.",
+            icon: <Scale size={32} />,
+            color: "yellow"
         }
     };
 
@@ -147,6 +161,10 @@ function NewProposalContent() {
         else if (type === 'OPPORTUNITY') {
             md += `## Market Intelligence\n- **Market Size:** ${oppMarket}\n- **Region:** ${oppRegion}\n- **Contact:** ${oppContact}\n`;
         }
+        else if (type === 'LEGAL_STRUCTURE') {
+            md += `## Legal Structure Config\n- **Type:** ${legalType}\n- **Jurisdiction:** ${legalJurisdiction}\n- **Control Model:** ${legalControl}\n- **Setup Budget:** ${legalBudget} USDC/BNB\n- **Facilitator:** ${legalFacilitator || 'TBD'}\n\n`;
+            md += `## Authorized Scope\n${legalScope.map(s => `- [x] ${s}`).join('\n')}`;
+        }
 
         md += `\n\n---\n**Declaration**: I confirm this proposal adheres to the Thrive Realms Governance Framework.`;
         return md;
@@ -163,7 +181,28 @@ function NewProposalContent() {
             let values: number[] = [];
             let calldatas: string[] = [];
 
-            if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
+            if (type === 'LEGAL_STRUCTURE') {
+                // TYPE: Governance Configuration (setLegalStructure)
+                const settingsInterface = new ethers.Interface(CONTRACT_ABIS.GovernanceSettings);
+
+                // Mappers
+                const typeMap: Record<string, number> = { "DAO-Controlled LLC": 0, "Foundation + Subsidiary": 1, "Hybrid Wrapper": 2, "Exploratory": 3 };
+                const controlMap: Record<string, number> = { "Multisig": 0, "Timelock": 1, "Hybrid": 2 };
+
+                const data = settingsInterface.encodeFunctionData("setLegalStructure", [
+                    typeMap[legalType] || 0,
+                    legalJurisdiction,
+                    legalScope,
+                    controlMap[legalControl] || 0,
+                    ethers.parseEther(legalBudget || "0"),
+                    legalFacilitator || ethers.ZeroAddress
+                ]);
+
+                targets = [CONTRACT_ADDRESSES.GOVERNANCE_SETTINGS];
+                values = [0];
+                calldatas = [data]; // Fixed: variable name was implicitly assigned in original logic, here explicit
+            }
+            else if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
                 // TYPE A/D/E: Execute registerEntity on Registry
                 // registerEntity(address, type, name, jurisdiction, metadata)
                 const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
@@ -401,7 +440,77 @@ function NewProposalContent() {
                                     <input value={oppContact} onChange={e => setOppContact(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Email or Telegram" />
                                 </div>
                             </div>
-                        )}
+                            </div>
+                )}
+
+                {/* TYPE: LEGAL STRUCTURE FIELDS */}
+                {type === 'LEGAL_STRUCTURE' && (
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-bold text-yellow-400">Structure Configuration</h3>
+
+                        <div className="space-y-4">
+                            <label className="block text-sm text-gray-400">1. Legal Structure Type</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {["DAO-Controlled LLC", "Foundation + Subsidiary", "Hybrid Wrapper", "Exploratory"].map(opt => (
+                                    <button key={opt} onClick={() => setLegalType(opt)}
+                                        className={`p-4 rounded border text-left transition ${legalType === opt ? 'bg-yellow-500/20 border-yellow-500 text-white' : 'bg-black/50 border-white/10 text-gray-400 hover:bg-white/5'}`}>
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">2. Jurisdiction</label>
+                                <select value={legalJurisdiction} onChange={e => setLegalJurisdiction(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                    <option>Wyoming (DAO-LLC)</option>
+                                    <option>UAE (Free Zone)</option>
+                                    <option>Estonia</option>
+                                    <option>Switzerland</option>
+                                    <option>Singapore</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">3. Control Model</label>
+                                <select value={legalControl} onChange={e => setLegalControl(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                    <option>Multisig</option>
+                                    <option>Timelock</option>
+                                    <option>Hybrid</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">4. Intended Scope (Multi-Select)</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {["Hold equity in physical projects", "Sign contracts with SMEs", "Hold fiat bank accounts", "Interface with on/off-ramps", "Receive DAO capital"].map(scopeItem => (
+                                    <label key={scopeItem} className="flex items-center gap-2 p-2 bg-white/5 rounded cursor-pointer hover:bg-white/10">
+                                        <input type="checkbox"
+                                            checked={legalScope.includes(scopeItem)}
+                                            onChange={e => {
+                                                if (e.target.checked) setLegalScope([...legalScope, scopeItem]);
+                                                else setLegalScope(legalScope.filter(s => s !== scopeItem));
+                                            }}
+                                            className="rounded border-gray-600 text-yellow-500 focus:ring-yellow-500 bg-black"
+                                        />
+                                        <span className="text-sm text-gray-300">{scopeItem}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">5. Setup Budget (Max Auth)</label>
+                                <input value={legalBudget} onChange={e => setLegalBudget(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0.00" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">6. Facilitator (Optional)</label>
+                                <input value={legalFacilitator} onChange={e => setLegalFacilitator(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0x... or TBD" />
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -423,6 +532,7 @@ function NewProposalContent() {
                                 {type === 'ENTITY' && " This proposal will AUTOMATICALLY whitelist the wallet address upon passing."}
                                 {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
                                 {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
+                                {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
                             </div>
                         </div>
                     </div>
