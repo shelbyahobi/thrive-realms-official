@@ -576,226 +576,225 @@ function NewProposalContent() {
                                     <input value={oppContact} onChange={e => setOppContact(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Email or Telegram" />
                                 </div>
                             </div>
-                            </div>
-                )}
+                        )}
 
-                {/* TYPE: LEGAL STRUCTURE FIELDS */}
-                {type === 'LEGAL_STRUCTURE' && (
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-bold text-yellow-400">Structure Configuration</h3>
+                        {/* TYPE: LEGAL STRUCTURE FIELDS */}
+                        {type === 'LEGAL_STRUCTURE' && (
+                            <div className="space-y-6">
+                                <h3 className="text-lg font-bold text-yellow-400">Structure Configuration</h3>
 
-                        <div className="space-y-4">
-                            <label className="block text-sm text-gray-400">1. Legal Structure Type</label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {["DAO-Controlled LLC", "Foundation + Subsidiary", "Hybrid Wrapper", "Exploratory"].map(opt => (
-                                    <button key={opt} onClick={() => setLegalType(opt)}
-                                        className={`p-4 rounded border text-left transition ${legalType === opt ? 'bg-yellow-500/20 border-yellow-500 text-white' : 'bg-black/50 border-white/10 text-gray-400 hover:bg-white/5'}`}>
-                                        {opt}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">2. Jurisdiction</label>
-                                <select value={legalJurisdiction} onChange={e => setLegalJurisdiction(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
-                                    <option>Wyoming (DAO-LLC)</option>
-                                    <option>UAE (Free Zone)</option>
-                                    <option>Estonia</option>
-                                    <option>Switzerland</option>
-                                    <option>Singapore</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">3. Control Model</label>
-                                <select value={legalControl} onChange={e => setLegalControl(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
-                                    <option>Multisig</option>
-                                    <option>Timelock</option>
-                                    <option>Hybrid</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm text-gray-400 mb-2">4. Intended Scope (Multi-Select)</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {["Hold equity in physical projects", "Sign contracts with SMEs", "Hold fiat bank accounts", "Interface with on/off-ramps", "Receive DAO capital"].map(scopeItem => (
-                                    <label key={scopeItem} className="flex items-center gap-2 p-2 bg-white/5 rounded cursor-pointer hover:bg-white/10">
-                                        <input type="checkbox"
-                                            checked={legalScope.includes(scopeItem)}
-                                            onChange={e => {
-                                                if (e.target.checked) setLegalScope([...legalScope, scopeItem]);
-                                                else setLegalScope(legalScope.filter(s => s !== scopeItem));
-                                            }}
-                                            className="rounded border-gray-600 text-yellow-500 focus:ring-yellow-500 bg-black"
-                                        />
-                                        <span className="text-sm text-gray-300">{scopeItem}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">5. Setup Budget (Max Auth)</label>
-                                <input value={legalBudget} onChange={e => setLegalBudget(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0.00" />
-                            </div>
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">6. Facilitator (Optional)</label>
-                                <input value={legalFacilitator} onChange={e => setLegalFacilitator(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0x... or TBD" />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* TYPE: LEGAL SETUP FUNDING FIELDS */}
-                {type === 'LEGAL_SETUP_FUNDING' && (
-                    <div className="space-y-6">
-                        <div className="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-lg">
-                            <h3 className="text-emerald-400 font-bold flex items-center gap-2 mb-2">
-                                <ShieldCheck size={18} /> Linked Legal Structure (Phase 1)
-                            </h3>
-                            {activeLegalStructure ? (
-                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
-                                    <div><span className="text-gray-500">Structure:</span> {["DAO-Controlled LLC", "Foundation", "Wrapper", "Exploratory"][activeLegalStructure.type] || "Unknown"}</div>
-                                    <div><span className="text-gray-500">Jurisdiction:</span> {activeLegalStructure.jurisdiction}</div>
-                                    <div><span className="text-gray-500">Max Budget:</span> {activeLegalStructure.budget}</div>
-                                    <div><span className="text-gray-500">Facilitator:</span> <span className="font-mono text-xs">{activeLegalStructure.facilitator}</span></div>
-                                </div>
-                            ) : (
-                                <div className="text-yellow-400 text-sm">Loading Phase 1 Data...</div>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Requested Amount (TRS)</label>
-                                <input
-                                    value={setupAmount}
-                                    onChange={e => setSetupAmount(e.target.value)}
-                                    className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-bold text-emerald-400"
-                                    placeholder="0.00"
-                                />
-                                {activeLegalStructure && parseFloat(setupAmount) > parseFloat(activeLegalStructure.budget) && (
-                                    <div className="text-red-400 text-xs mt-1">Exceeds Phase 1 Cap ({activeLegalStructure.budget})</div>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Executor Type</label>
-                                <div className="flex gap-2">
-                                    {['Facilitator', 'Interim', 'Wallet'].map(t => (
-                                        <button key={t} onClick={() => setSetupExecutorType(t)}
-                                            className={`px-3 py-2 rounded text-sm transition ${setupExecutorType === t ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400'}`}>
-                                            {t}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm text-gray-400 mb-1">Executor Wallet</label>
-                            <input
-                                value={setupExecutorWallet}
-                                onChange={e => setSetupExecutorWallet(e.target.value)}
-                                className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono"
-                                placeholder="0x..."
-                            />
-                            {setupExecutorType === 'Facilitator' && activeLegalStructure && activeLegalStructure.facilitator !== ethers.ZeroAddress && (
-                                <button onClick={() => setSetupExecutorWallet(activeLegalStructure.facilitator)} className="text-xs text-emerald-400 mt-1 hover:underline">
-                                    Use Approved Facilitator ({activeLegalStructure.facilitator.slice(0, 6)}...)
-                                </button>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm text-gray-400 mb-2">Expense Breakdown</label>
-                            <div className="space-y-2">
-                                <div className="grid grid-cols-12 gap-2 text-xs text-gray-500 uppercase font-bold">
-                                    <div className="col-span-3">Category</div>
-                                    <div className="col-span-6">Description</div>
-                                    <div className="col-span-3">Amount</div>
-                                </div>
-                                {expenseBreakdown.map((row, i) => (
-                                    <div key={i} className="grid grid-cols-12 gap-2">
-                                        <div className="col-span-3 text-sm text-gray-400 bg-white/5 rounded px-2 py-1">{row.category}</div>
-                                        <input
-                                            value={row.desc}
-                                            onChange={e => { const n = [...expenseBreakdown]; n[i].desc = e.target.value; setExpenseBreakdown(n); }}
-                                            className="col-span-6 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
-                                        />
-                                        <input
-                                            value={row.amount}
-                                            onChange={e => { const n = [...expenseBreakdown]; n[i].amount = e.target.value; setExpenseBreakdown(n); }}
-                                            className="col-span-3 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
-                                        />
+                                <div className="space-y-4">
+                                    <label className="block text-sm text-gray-400">1. Legal Structure Type</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {["DAO-Controlled LLC", "Foundation + Subsidiary", "Hybrid Wrapper", "Exploratory"].map(opt => (
+                                            <button key={opt} onClick={() => setLegalType(opt)}
+                                                className={`p-4 rounded border text-left transition ${legalType === opt ? 'bg-yellow-500/20 border-yellow-500 text-white' : 'bg-black/50 border-white/10 text-gray-400 hover:bg-white/5'}`}>
+                                                {opt}
+                                            </button>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </div>
+                                </div>
 
-                        <label className="flex items-center gap-3 p-4 bg-white/5 rounded cursor-pointer hover:bg-white/10 border border-transparent hover:border-emerald-500/30 transition">
-                            <input
-                                type="checkbox"
-                                checked={reportingCommitment}
-                                onChange={e => setReportingCommitment(e.target.checked)}
-                                className="w-5 h-5 rounded border-gray-600 text-emerald-500 focus:ring-emerald-500 bg-black"
-                            />
-                            <div className="text-sm">
-                                <strong className="text-white block">Reporting Commitment</strong>
-                                <span className="text-gray-400">Executor agrees to submit proof of incorporation and banking setup within 30 days.</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">2. Jurisdiction</label>
+                                        <select value={legalJurisdiction} onChange={e => setLegalJurisdiction(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Wyoming (DAO-LLC)</option>
+                                            <option>UAE (Free Zone)</option>
+                                            <option>Estonia</option>
+                                            <option>Switzerland</option>
+                                            <option>Singapore</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">3. Control Model</label>
+                                        <select value={legalControl} onChange={e => setLegalControl(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Multisig</option>
+                                            <option>Timelock</option>
+                                            <option>Hybrid</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">4. Intended Scope (Multi-Select)</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {["Hold equity in physical projects", "Sign contracts with SMEs", "Hold fiat bank accounts", "Interface with on/off-ramps", "Receive DAO capital"].map(scopeItem => (
+                                            <label key={scopeItem} className="flex items-center gap-2 p-2 bg-white/5 rounded cursor-pointer hover:bg-white/10">
+                                                <input type="checkbox"
+                                                    checked={legalScope.includes(scopeItem)}
+                                                    onChange={e => {
+                                                        if (e.target.checked) setLegalScope([...legalScope, scopeItem]);
+                                                        else setLegalScope(legalScope.filter(s => s !== scopeItem));
+                                                    }}
+                                                    className="rounded border-gray-600 text-yellow-500 focus:ring-yellow-500 bg-black"
+                                                />
+                                                <span className="text-sm text-gray-300">{scopeItem}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">5. Setup Budget (Max Auth)</label>
+                                        <input value={legalBudget} onChange={e => setLegalBudget(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0.00" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">6. Facilitator (Optional)</label>
+                                        <input value={legalFacilitator} onChange={e => setLegalFacilitator(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="0x... or TBD" />
+                                    </div>
+                                </div>
                             </div>
-                        </label>
+                        )}
+
+                        {/* TYPE: LEGAL SETUP FUNDING FIELDS */}
+                        {type === 'LEGAL_SETUP_FUNDING' && (
+                            <div className="space-y-6">
+                                <div className="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-lg">
+                                    <h3 className="text-emerald-400 font-bold flex items-center gap-2 mb-2">
+                                        <ShieldCheck size={18} /> Linked Legal Structure (Phase 1)
+                                    </h3>
+                                    {activeLegalStructure ? (
+                                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+                                            <div><span className="text-gray-500">Structure:</span> {["DAO-Controlled LLC", "Foundation", "Wrapper", "Exploratory"][activeLegalStructure.type] || "Unknown"}</div>
+                                            <div><span className="text-gray-500">Jurisdiction:</span> {activeLegalStructure.jurisdiction}</div>
+                                            <div><span className="text-gray-500">Max Budget:</span> {activeLegalStructure.budget}</div>
+                                            <div><span className="text-gray-500">Facilitator:</span> <span className="font-mono text-xs">{activeLegalStructure.facilitator}</span></div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-yellow-400 text-sm">Loading Phase 1 Data...</div>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Requested Amount (TRS)</label>
+                                        <input
+                                            value={setupAmount}
+                                            onChange={e => setSetupAmount(e.target.value)}
+                                            className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-bold text-emerald-400"
+                                            placeholder="0.00"
+                                        />
+                                        {activeLegalStructure && parseFloat(setupAmount) > parseFloat(activeLegalStructure.budget) && (
+                                            <div className="text-red-400 text-xs mt-1">Exceeds Phase 1 Cap ({activeLegalStructure.budget})</div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Executor Type</label>
+                                        <div className="flex gap-2">
+                                            {['Facilitator', 'Interim', 'Wallet'].map(t => (
+                                                <button key={t} onClick={() => setSetupExecutorType(t)}
+                                                    className={`px-3 py-2 rounded text-sm transition ${setupExecutorType === t ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400'}`}>
+                                                    {t}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Executor Wallet</label>
+                                    <input
+                                        value={setupExecutorWallet}
+                                        onChange={e => setSetupExecutorWallet(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono"
+                                        placeholder="0x..."
+                                    />
+                                    {setupExecutorType === 'Facilitator' && activeLegalStructure && activeLegalStructure.facilitator !== ethers.ZeroAddress && (
+                                        <button onClick={() => setSetupExecutorWallet(activeLegalStructure.facilitator)} className="text-xs text-emerald-400 mt-1 hover:underline">
+                                            Use Approved Facilitator ({activeLegalStructure.facilitator.slice(0, 6)}...)
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-2">Expense Breakdown</label>
+                                    <div className="space-y-2">
+                                        <div className="grid grid-cols-12 gap-2 text-xs text-gray-500 uppercase font-bold">
+                                            <div className="col-span-3">Category</div>
+                                            <div className="col-span-6">Description</div>
+                                            <div className="col-span-3">Amount</div>
+                                        </div>
+                                        {expenseBreakdown.map((row, i) => (
+                                            <div key={i} className="grid grid-cols-12 gap-2">
+                                                <div className="col-span-3 text-sm text-gray-400 bg-white/5 rounded px-2 py-1">{row.category}</div>
+                                                <input
+                                                    value={row.desc}
+                                                    onChange={e => { const n = [...expenseBreakdown]; n[i].desc = e.target.value; setExpenseBreakdown(n); }}
+                                                    className="col-span-6 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
+                                                />
+                                                <input
+                                                    value={row.amount}
+                                                    onChange={e => { const n = [...expenseBreakdown]; n[i].amount = e.target.value; setExpenseBreakdown(n); }}
+                                                    className="col-span-3 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <label className="flex items-center gap-3 p-4 bg-white/5 rounded cursor-pointer hover:bg-white/10 border border-transparent hover:border-emerald-500/30 transition">
+                                    <input
+                                        type="checkbox"
+                                        checked={reportingCommitment}
+                                        onChange={e => setReportingCommitment(e.target.checked)}
+                                        className="w-5 h-5 rounded border-gray-600 text-emerald-500 focus:ring-emerald-500 bg-black"
+                                    />
+                                    <div className="text-sm">
+                                        <strong className="text-white block">Reporting Commitment</strong>
+                                        <span className="text-gray-400">Executor agrees to submit proof of incorporation and banking setup within 30 days.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        )}
+
+                        {/* STEP 3: REVIEW */}
+                        {step === 3 && (
+                            <div className="animate-fadeIn space-y-6">
+                                <h2 className="text-2xl font-bold text-white mb-4">Confirm & Submit</h2>
+                                <div className="p-6 bg-white/5 rounded border border-white/10">
+                                    <h3 className="text-xl font-serif text-white mb-2">{title}</h3>
+                                    <div className="prose prose-invert max-w-none text-sm text-gray-400 whitespace-pre-wrap font-mono bg-black/30 p-4 rounded">
+                                        {generateMarkdown()}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 p-4 bg-yellow-900/10 border border-yellow-500/20 rounded">
+                                    <AlertTriangle className="text-yellow-500" />
+                                    <div className="text-sm text-yellow-200">
+                                        <strong>On-Chain Action:</strong>
+                                        {type === 'ENTITY' && " This proposal will AUTOMATICALLY whitelist the wallet address upon passing."}
+                                        {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
+                                        {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
+                                        {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
+                                        {type === 'LEGAL_SETUP_FUNDING' && " This proposal will RELEASE FUNDS to the executor and Advance DaoPhase."}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
-
-                {/* STEP 3: REVIEW */}
-                {step === 3 && (
-                    <div className="animate-fadeIn space-y-6">
-                        <h2 className="text-2xl font-bold text-white mb-4">Confirm & Submit</h2>
-                        <div className="p-6 bg-white/5 rounded border border-white/10">
-                            <h3 className="text-xl font-serif text-white mb-2">{title}</h3>
-                            <div className="prose prose-invert max-w-none text-sm text-gray-400 whitespace-pre-wrap font-mono bg-black/30 p-4 rounded">
-                                {generateMarkdown()}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 bg-yellow-900/10 border border-yellow-500/20 rounded">
-                            <AlertTriangle className="text-yellow-500" />
-                            <div className="text-sm text-yellow-200">
-                                <strong>On-Chain Action:</strong>
-                                {type === 'ENTITY' && " This proposal will AUTOMATICALLY whitelist the wallet address upon passing."}
-                                {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
-                                {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
-                                {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
-                                {type === 'LEGAL_SETUP_FUNDING' && " This proposal will RELEASE FUNDS to the executor and Advance DaoPhase."}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
 
             {/* NAVIGATION ACTIONS */}
-            <div className="flex justify-between mt-8 border-t border-white/10 pt-6">
-                <button onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1} className="px-6 py-2 rounded bg-white/5 hover:bg-white/10 text-white disabled:opacity-0 transition">Back</button>
-                {step < 3 ? (
-                    <button onClick={() => setStep(s => s + 1)} className="px-8 py-2 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-2">Next <ChevronRight size={16} /></button>
-                ) : (
-                    <button onClick={submitProposal} disabled={loading} className="px-8 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold transition flex items-center gap-2">
-                        {loading ? 'Processing...' : 'Submit to DAO'} <ShieldCheck size={16} />
-                    </button>
-                )}
+                <div className="flex justify-between mt-8 border-t border-white/10 pt-6">
+                    <button onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1} className="px-6 py-2 rounded bg-white/5 hover:bg-white/10 text-white disabled:opacity-0 transition">Back</button>
+                    {step < 3 ? (
+                        <button onClick={() => setStep(s => s + 1)} className="px-8 py-2 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-2">Next <ChevronRight size={16} /></button>
+                    ) : (
+                        <button onClick={submitProposal} disabled={loading} className="px-8 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold transition flex items-center gap-2">
+                            {loading ? 'Processing...' : 'Submit to DAO'} <ShieldCheck size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
-        </div>
-    );
+            );
 }
 
-export default function NewProposalPage() {
+            export default function NewProposalPage() {
     return (
-        <Suspense fallback={<div className="p-12 text-center text-gray-500">Loading...</div>}>
-            <NewProposalContent />
-        </Suspense>
-    );
+            <Suspense fallback={<div className="p-12 text-center text-gray-500">Loading...</div>}>
+                <NewProposalContent />
+            </Suspense>
+            );
 }
