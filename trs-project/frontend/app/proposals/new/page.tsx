@@ -750,51 +750,147 @@ function NewProposalContent() {
                             </div>
                         )}
 
-                        {/* STEP 3: REVIEW */}
-                        {step === 3 && (
-                            <div className="animate-fadeIn space-y-6">
-                                <h2 className="text-2xl font-bold text-white mb-4">Confirm & Submit</h2>
-                                <div className="p-6 bg-white/5 rounded border border-white/10">
-                                    <h3 className="text-xl font-serif text-white mb-2">{title}</h3>
-                                    <div className="prose prose-invert max-w-none text-sm text-gray-400 whitespace-pre-wrap font-mono bg-black/30 p-4 rounded">
-                                        {generateMarkdown()}
+                        {/* TYPE: FIAT BRIDGE AUTHORIZATION */}
+                        {type === 'FIAT_BRIDGE' && (
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-bold text-cyan-400">Fiat Bridge Configuration</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Provider Legal Name</label>
+                                        <input value={entityName} onChange={e => setEntityName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Registration Country</label>
+                                        <input value={jurisdiction} onChange={e => setJurisdiction(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">License Type</label>
+                                    <input value={bridgeLicense} onChange={e => setBridgeLicense(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="EMI, MSB, PSP..." />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Custody Wallet (Critical)</label>
+                                    <input value={entityAddress} onChange={e => setEntityAddress(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" placeholder="0x..." />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Max Monthly Flow Cap (USD equiv)</label>
+                                    <input value={bridgeCap} onChange={e => setBridgeCap(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="50000" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TYPE: EXECUTION POD CREATION */}
+                        {type === 'EXECUTION_POD' && (
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-bold text-pink-400">Execution Pod Setup</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Pod Name</label>
+                                        <input value={entityName} onChange={e => setEntityName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Asia Expansion Pod" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Mandate Type</label>
+                                        <select value={podMandate} onChange={e => setPodMandate(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Geographic</option>
+                                            <option>Sector-specific</option>
+                                            <option>Project-specific</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Pod Treasury Safe (Gnosis)</label>
+                                        <input value={podTreasury} onChange={e => setPodTreasury(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" placeholder="0x..." />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Executor Wallet (Hot)</label>
+                                        <input value={entityAddress} onChange={e => setEntityAddress(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" placeholder="0x..." />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Budget Ceiling (TRS)</label>
+                                    <input value={podCap} onChange={e => setPodCap(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="100000" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TYPE: PROJECT FUNDING (Reusing Funding Logic but Gated) */}
+                        {type === 'PROJECT_FUNDING' && (
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-bold text-blue-400">Project Funding Execution</h3>
+                                <p className="text-sm text-gray-400">Unlock real-world execution funds for an approved pod/project.</p>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Executor / Pod Wallet</label>
+                                        <input value={executor} onChange={e => setExecutor(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" placeholder="0x..." />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Total Budget (TRS)</label>
+                                        <input value={budget} onChange={e => setBudget(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-bold" placeholder="0.00" />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 p-4 bg-yellow-900/10 border border-yellow-500/20 rounded">
-                                    <AlertTriangle className="text-yellow-500" />
-                                    <div className="text-sm text-yellow-200">
-                                        <strong>On-Chain Action:</strong>
-                                        {type === 'ENTITY' && " This proposal will AUTOMATICALLY whitelist the wallet address upon passing."}
-                                        {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
-                                        {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
-                                        {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
-                                        {type === 'LEGAL_SETUP_FUNDING' && " This proposal will RELEASE FUNDS to the executor and Advance DaoPhase."}
-                                    </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Milestones</label>
+                                    {milestones.map((m, i) => (
+                                        <div key={i} className="flex gap-2 mb-2">
+                                            <input value={m.desc} onChange={e => { const n = [...milestones]; n[i].desc = e.target.value; setMilestones(n) }} className="flex-grow bg-black/50 border border-white/10 rounded p-2 text-white" placeholder="Description" />
+                                            <input value={m.amount} onChange={e => { const n = [...milestones]; n[i].amount = e.target.value; setMilestones(n) }} className="w-32 bg-black/50 border border-white/10 rounded p-2 text-white" placeholder="Amount" />
+                                        </div>
+                                    ))}
+                                    <button onClick={() => setMilestones([...milestones, { desc: '', amount: '' }])} className="text-xs text-blue-400 hover:text-blue-300">+ Add Milestone</button>
                                 </div>
                             </div>
                         )}
                     </div>
+                )}
+
+                {/* STEP 3: REVIEW */}
+                {step === 3 && (
+                    <div className="animate-fadeIn space-y-6">
+                        <h2 className="text-2xl font-bold text-white mb-4">Confirm & Submit</h2>
+                        <div className="p-6 bg-white/5 rounded border border-white/10">
+                            <h3 className="text-xl font-serif text-white mb-2">{title}</h3>
+                            <div className="prose prose-invert max-w-none text-sm text-gray-400 whitespace-pre-wrap font-mono bg-black/30 p-4 rounded">
+                                {generateMarkdown()}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 p-4 bg-yellow-900/10 border border-yellow-500/20 rounded">
+                            <AlertTriangle className="text-yellow-500" />
+                            <div className="text-sm text-yellow-200">
+                                <strong>On-Chain Action:</strong>
+                                {type === 'ENTITY' && " This proposal will AUTOMATICALLY whitelist the wallet address upon passing."}
+                                {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
+                                {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
+                                {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
+                                {type === 'LEGAL_SETUP_FUNDING' && " This proposal will RELEASE FUNDS to the executor and Advance DaoPhase."}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* NAVIGATION ACTIONS */}
-                <div className="flex justify-between mt-8 border-t border-white/10 pt-6">
-                    <button onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1} className="px-6 py-2 rounded bg-white/5 hover:bg-white/10 text-white disabled:opacity-0 transition">Back</button>
-                    {step < 3 ? (
-                        <button onClick={() => setStep(s => s + 1)} className="px-8 py-2 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-2">Next <ChevronRight size={16} /></button>
-                    ) : (
-                        <button onClick={submitProposal} disabled={loading} className="px-8 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold transition flex items-center gap-2">
-                            {loading ? 'Processing...' : 'Submit to DAO'} <ShieldCheck size={16} />
-                        </button>
-                    )}
-                </div>
+            <div className="flex justify-between mt-8 border-t border-white/10 pt-6">
+                <button onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1} className="px-6 py-2 rounded bg-white/5 hover:bg-white/10 text-white disabled:opacity-0 transition">Back</button>
+                {step < 3 ? (
+                    <button onClick={() => setStep(s => s + 1)} className="px-8 py-2 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-2">Next <ChevronRight size={16} /></button>
+                ) : (
+                    <button onClick={submitProposal} disabled={loading} className="px-8 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold transition flex items-center gap-2">
+                        {loading ? 'Processing...' : 'Submit to DAO'} <ShieldCheck size={16} />
+                    </button>
+                )}
             </div>
-            );
+        </div>
+    );
 }
 
-            export default function NewProposalPage() {
+export default function NewProposalPage() {
     return (
-            <Suspense fallback={<div className="p-12 text-center text-gray-500">Loading...</div>}>
-                <NewProposalContent />
-            </Suspense>
-            );
+        <Suspense fallback={<div className="p-12 text-center text-gray-500">Loading...</div>}>
+            <NewProposalContent />
+        </Suspense>
+    );
 }
