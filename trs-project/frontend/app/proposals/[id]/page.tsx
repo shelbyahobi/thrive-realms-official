@@ -329,7 +329,7 @@ export default function ProposalDetailPage() {
                 )}
 
                 {/* Voting Actions */}
-                {account && (
+                {account && (proposal.state === 0 || proposal.state === 1) && (
                     <div className="glass-card p-6 border-l-4 border-blue-500">
                         <h3 className="font-bold mb-4">Cast Your Vote</h3>
 
