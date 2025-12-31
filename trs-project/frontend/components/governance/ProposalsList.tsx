@@ -241,6 +241,47 @@ export default function ProposalsList() {
             )}
 
             <div className="space-y-4">
+                {filteredProposals.map(p => {
+                    const desc = p.description || "";
+                    const titleMatch = desc.match(/^#\s+(.+)$/m);
+                    const title = titleMatch ? titleMatch[1] : `Proposal #${p.id.substring(0, 6)}...`;
+
+                    // Clean summary
+                    let summary = desc
+                        .replace(/^#\s+.+$/m, '')
+                        .replace(/^\|.*$/gm, '')
+                        .replace(/^\s*[\-\*]{3,}\s*$/gm, '')
+                        .replace(/#+/g, '')
+                        .trim()
+                        .substring(0, 150) + "...";
+
+                    return (
+                        <Link href={`/proposals/${p.id}`} key={p.id} className="block glass-card hover:border-purple-500/50 transition duration-200 group">
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">{title}</h3>
+                                <span className={`px-3 py-1 rounded text-xs font-bold ${p.state === 1 ? 'bg-green-500/20 text-green-400' :
+                                    p.state === 4 ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-700 text-gray-300'
+                                    }`}>
+                                    {ProposalState[p.state]}
+                                </span>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4 font-mono opacity-70">{summary}</p>
+                            <div className="grid grid-cols-3 gap-4 text-center text-xs bg-black/40 p-3 rounded border border-white/5">
+                                <div>
+                                    <span className="block text-green-400 font-bold text-lg">{parseFloat(p.forVotes).toLocaleString()}</span>
+                                    <span className="text-gray-500 uppercase tracking-wider">For</span>
+                                </div>
+                                <div>
+                                    <span className="block text-red-400 font-bold text-lg">{parseFloat(p.againstVotes).toLocaleString()}</span>
+                                    <span className="text-gray-500 uppercase tracking-wider">Against</span>
+                                </div>
+                                <div>
+                                    <span className="block text-gray-400 font-bold text-lg">{parseFloat(p.abstainVotes).toLocaleString()}</span>
+                                    <span className="text-gray-500 uppercase tracking-wider">Abstain</span>
+                                </div>
+                            </div>
+                        </Link>
+                    );
                 })}
 
                 {(!loading || scanStatus) && (
