@@ -16,7 +16,7 @@ const CATEGORIES = [
 const EXECUTION_MODELS = ["Approved Company", "Approved Individual", "Internal DAO Execution"];
 
 // Proposal Types mapped to User's Architecture
-type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD' | 'LEGAL_STRUCTURE';
+type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD' | 'LEGAL_STRUCTURE' | 'LEGAL_SETUP_FUNDING';
 
 function NewProposalContent() {
     const { provider, signer, account } = useWallet();
@@ -29,6 +29,10 @@ function NewProposalContent() {
     const [loading, setLoading] = useState(false);
     const [userTier, setUserTier] = useState('');
     const [reputation, setReputation] = useState(0);
+
+    // Global DAO State
+    const [daoPhase, setDaoPhase] = useState<number>(0); // 0: GOV_ONLY, 1: LEGAL_APPROVED
+    const [activeLegalStructure, setActiveLegalStructure] = useState<any>(null);
 
     // --- FORM DATA ---
     const [title, setTitle] = useState('');
@@ -58,10 +62,22 @@ function NewProposalContent() {
     const [legalBudget, setLegalBudget] = useState('');
     const [legalFacilitator, setLegalFacilitator] = useState('');
 
+    // Phase 2: Legal Setup Funding
+    const [setupAmount, setSetupAmount] = useState('');
+    const [expenseBreakdown, setExpenseBreakdown] = useState<{ category: string, desc: string, amount: string }[]>([
+        { category: 'Legal', desc: 'Incorporation', amount: '' },
+        { category: 'Banking', desc: 'Account Setup', amount: '' },
+        { category: 'Compliance', desc: 'Advisory', amount: '' }
+    ]);
+    const [setupExecutorType, setSetupExecutorType] = useState('Facilitator');
+    const [setupExecutorWallet, setSetupExecutorWallet] = useState('');
+    const [reportingCommitment, setReportingCommitment] = useState(false);
+
     useEffect(() => {
         if (provider && account) {
             checkEligibility();
             fetchReputation();
+            fetchDaoState();
         }
         // Auto-select type from URL
         const t = searchParams.get('type');
@@ -70,6 +86,26 @@ function NewProposalContent() {
         if (t === 'opportunity') setType('OPPORTUNITY');
         if (t === 'fast_track') setType('FAST_TRACK');
     }, [provider, account, searchParams]);
+
+    async function fetchDaoState() {
+        if (!provider) return;
+        try {
+            const govSettings = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNANCE_SETTINGS, CONTRACT_ABIS.GovernanceSettings, provider);
+            const phase = await govSettings.currentPhase();
+            setDaoPhase(Number(phase));
+
+            const structure = await govSettings.getLegalStructure();
+            // structure returns tuple, map to object if needed, or just store
+            setActiveLegalStructure({
+                type: Number(structure.structureType),
+                jurisdiction: structure.jurisdiction,
+                budget: ethers.formatEther(structure.setupBudget),
+                facilitator: structure.facilitator
+            });
+        } catch (e) {
+            console.error("Failed to fetch DAO state", e);
+        }
+    }
 
     async function checkEligibility() {
         if (!provider || !account) return;
@@ -139,6 +175,12 @@ function NewProposalContent() {
             desc: "Define the legal entity, jurisdiction, and control model for the DAO.",
             icon: <Scale size={32} />,
             color: "yellow"
+        },
+        'LEGAL_SETUP_FUNDING': {
+            title: "Request Funding → Legal Setup",
+            desc: "Fund the specific costs of incorporation (Unlocked by Phase 1).",
+            icon: <Briefcase size={32} />,
+            color: "emerald"
         }
     };
 
@@ -164,6 +206,12 @@ function NewProposalContent() {
         else if (type === 'LEGAL_STRUCTURE') {
             md += `## Legal Structure Config\n- **Type:** ${legalType}\n- **Jurisdiction:** ${legalJurisdiction}\n- **Control Model:** ${legalControl}\n- **Setup Budget:** ${legalBudget} USDC/BNB\n- **Facilitator:** ${legalFacilitator || 'TBD'}\n\n`;
             md += `## Authorized Scope\n${legalScope.map(s => `- [x] ${s}`).join('\n')}`;
+        }
+        else if (type === 'LEGAL_SETUP_FUNDING') {
+            md += `## Legal Setup Funding\n- **Requested Amount:** ${setupAmount} TRS\n- **Executor:** ${setupExecutorWallet} (${setupExecutorType})\n\n`;
+            md += `## Expense Breakdown\n| Category | Description | Amount |\n|---|---|---|\n`;
+            expenseBreakdown.forEach(r => md += `| ${r.category} | ${r.desc} | ${r.amount} |\n`);
+            md += `\n**Reporting Commitment:** Executor agrees to submit proof of incorporation within 30 days.`;
         }
 
         md += `\n\n---\n**Declaration**: I confirm this proposal adheres to the Thrive Realms Governance Framework.`;
@@ -234,6 +282,27 @@ function NewProposalContent() {
                 targets = [CONTRACT_ADDRESSES.OPPORTUNITY_REGISTRY];
                 values = [0];
                 calldatas = [data];
+            }
+            else if (type === 'LEGAL_SETUP_FUNDING') {
+                // TYPE: Legal Setup Funding (Authorize + Transfer)
+                // 1. Authorize State Change
+                const settingsInterface = new ethers.Interface(CONTRACT_ABIS.GovernanceSettings);
+                const authDetail = settingsInterface.encodeFunctionData("authorizeLegalSetupFunding", [
+                    setupExecutorWallet,
+                    ethers.parseEther(setupAmount || "0")
+                ]);
+
+                // 2. Transfer Funds (Using TRS Token for MVP)
+                const tokenInterface = new ethers.Interface(CONTRACT_ABIS.TRSToken);
+                const transferData = tokenInterface.encodeFunctionData("transfer", [
+                    setupExecutorWallet,
+                    ethers.parseEther(setupAmount || "0")
+                ]);
+
+                // Construct Batch
+                targets = [CONTRACT_ADDRESSES.GOVERNANCE_SETTINGS, CONTRACT_ADDRESSES.TOKEN];
+                values = [0, 0];
+                calldatas = [authDetail, transferData];
             }
             else {
                 // TYPE B & FAST_TRACK: Funding - Batch Execution (Approve + CreateProject)
@@ -323,7 +392,18 @@ function NewProposalContent() {
                         <h2 className="text-2xl font-bold text-white mb-6">Select Proposal Type</h2>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             {(Object.keys(typeConfig) as ProposalType[]).map((t) => {
-                                const isDisabled = t === 'FAST_TRACK' && reputation < 80;
+                                let isDisabled = false;
+                                let reason = "";
+
+                                if (t === 'FAST_TRACK' && reputation < 80) {
+                                    isDisabled = true;
+                                    reason = `Requires Rep Score 80+ (${reputation || 0})`;
+                                }
+                                if (t === 'LEGAL_SETUP_FUNDING' && daoPhase < 1) { // 1 = LEGAL_STRUCTURE_APPROVED
+                                    isDisabled = true;
+                                    reason = "Requires Phase 1 (Legal Structure) Passed";
+                                }
+
                                 return (
                                     <button key={t}
                                         disabled={isDisabled}
@@ -341,7 +421,7 @@ function NewProposalContent() {
                                         <p className="text-sm text-gray-400 mb-2">{typeConfig[t].desc}</p>
                                         {isDisabled && (
                                             <div className="text-xs text-red-400 font-bold bg-red-900/20 py-1 px-2 rounded inline-block">
-                                                Requires Rep Score 80+ ({reputation || 0})
+                                                {reason}
                                             </div>
                                         )}
                                     </button>
@@ -514,6 +594,107 @@ function NewProposalContent() {
                     </div>
                 )}
 
+                {/* TYPE: LEGAL SETUP FUNDING FIELDS */}
+                {type === 'LEGAL_SETUP_FUNDING' && (
+                    <div className="space-y-6">
+                        <div className="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-lg">
+                            <h3 className="text-emerald-400 font-bold flex items-center gap-2 mb-2">
+                                <ShieldCheck size={18} /> Linked Legal Structure (Phase 1)
+                            </h3>
+                            {activeLegalStructure ? (
+                                <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+                                    <div><span className="text-gray-500">Structure:</span> {["DAO-Controlled LLC", "Foundation", "Wrapper", "Exploratory"][activeLegalStructure.type] || "Unknown"}</div>
+                                    <div><span className="text-gray-500">Jurisdiction:</span> {activeLegalStructure.jurisdiction}</div>
+                                    <div><span className="text-gray-500">Max Budget:</span> {activeLegalStructure.budget}</div>
+                                    <div><span className="text-gray-500">Facilitator:</span> <span className="font-mono text-xs">{activeLegalStructure.facilitator}</span></div>
+                                </div>
+                            ) : (
+                                <div className="text-yellow-400 text-sm">Loading Phase 1 Data...</div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Requested Amount (TRS)</label>
+                                <input
+                                    value={setupAmount}
+                                    onChange={e => setSetupAmount(e.target.value)}
+                                    className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-bold text-emerald-400"
+                                    placeholder="0.00"
+                                />
+                                {activeLegalStructure && parseFloat(setupAmount) > parseFloat(activeLegalStructure.budget) && (
+                                    <div className="text-red-400 text-xs mt-1">Exceeds Phase 1 Cap ({activeLegalStructure.budget})</div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Executor Type</label>
+                                <div className="flex gap-2">
+                                    {['Facilitator', 'Interim', 'Wallet'].map(t => (
+                                        <button key={t} onClick={() => setSetupExecutorType(t)}
+                                            className={`px-3 py-2 rounded text-sm transition ${setupExecutorType === t ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400'}`}>
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1">Executor Wallet</label>
+                            <input
+                                value={setupExecutorWallet}
+                                onChange={e => setSetupExecutorWallet(e.target.value)}
+                                className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono"
+                                placeholder="0x..."
+                            />
+                            {setupExecutorType === 'Facilitator' && activeLegalStructure && activeLegalStructure.facilitator !== ethers.ZeroAddress && (
+                                <button onClick={() => setSetupExecutorWallet(activeLegalStructure.facilitator)} className="text-xs text-emerald-400 mt-1 hover:underline">
+                                    Use Approved Facilitator ({activeLegalStructure.facilitator.slice(0, 6)}...)
+                                </button>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">Expense Breakdown</label>
+                            <div className="space-y-2">
+                                <div className="grid grid-cols-12 gap-2 text-xs text-gray-500 uppercase font-bold">
+                                    <div className="col-span-3">Category</div>
+                                    <div className="col-span-6">Description</div>
+                                    <div className="col-span-3">Amount</div>
+                                </div>
+                                {expenseBreakdown.map((row, i) => (
+                                    <div key={i} className="grid grid-cols-12 gap-2">
+                                        <div className="col-span-3 text-sm text-gray-400 bg-white/5 rounded px-2 py-1">{row.category}</div>
+                                        <input
+                                            value={row.desc}
+                                            onChange={e => { const n = [...expenseBreakdown]; n[i].desc = e.target.value; setExpenseBreakdown(n); }}
+                                            className="col-span-6 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                        <input
+                                            value={row.amount}
+                                            onChange={e => { const n = [...expenseBreakdown]; n[i].amount = e.target.value; setExpenseBreakdown(n); }}
+                                            className="col-span-3 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <label className="flex items-center gap-3 p-4 bg-white/5 rounded cursor-pointer hover:bg-white/10 border border-transparent hover:border-emerald-500/30 transition">
+                            <input
+                                type="checkbox"
+                                checked={reportingCommitment}
+                                onChange={e => setReportingCommitment(e.target.checked)}
+                                className="w-5 h-5 rounded border-gray-600 text-emerald-500 focus:ring-emerald-500 bg-black"
+                            />
+                            <div className="text-sm">
+                                <strong className="text-white block">Reporting Commitment</strong>
+                                <span className="text-gray-400">Executor agrees to submit proof of incorporation and banking setup within 30 days.</span>
+                            </div>
+                        </label>
+                    </div>
+                )}
+
                 {/* STEP 3: REVIEW */}
                 {step === 3 && (
                     <div className="animate-fadeIn space-y-6">
@@ -533,6 +714,7 @@ function NewProposalContent() {
                                 {type === 'OPPORTUNITY' && " This proposal will publish the opportunity to the Intelligence Vault."}
                                 {type === 'FUNDING' && " This proposal will request a funding allocation from the Treasury."}
                                 {type === 'LEGAL_STRUCTURE' && " This proposal will LOCK the Legal Structure configuration on-chain."}
+                                {type === 'LEGAL_SETUP_FUNDING' && " This proposal will RELEASE FUNDS to the executor and Advance DaoPhase."}
                             </div>
                         </div>
                     </div>

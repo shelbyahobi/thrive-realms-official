@@ -11,10 +11,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract GovernanceSettings is Ownable {
     
     enum DaoPhase { 
-        SETUP, 
+        GOVERNANCE_ONLY, 
         LEGAL_STRUCTURE_APPROVED, 
-        FUNDED,
-        OPERATIONAL 
+        LEGAL_SETUP_IN_PROGRESS, 
+        LEGAL_READY, 
+        FUNDING_ENABLED, 
+        EXECUTION_LIVE 
     }
 
     enum EntityType { 
@@ -52,9 +54,10 @@ contract GovernanceSettings is Ownable {
         uint256 budget,
         address facilitator
     );
+    event LegalSetupAuthorized(address executor, uint256 amount);
 
     constructor() Ownable() {
-        currentPhase = DaoPhase.SETUP;
+        currentPhase = DaoPhase.GOVERNANCE_ONLY;
     }
 
     /**
@@ -69,7 +72,7 @@ contract GovernanceSettings is Ownable {
         uint256 _setupBudget,
         address _facilitator
     ) external onlyOwner {
-        require(currentPhase == DaoPhase.SETUP, "Phase already advanced");
+        require(currentPhase == DaoPhase.GOVERNANCE_ONLY, "Phase already advanced");
 
         legalStructure = LegalStructure({
             structureType: _structureType,
@@ -84,6 +87,18 @@ contract GovernanceSettings is Ownable {
         _setPhase(DaoPhase.LEGAL_STRUCTURE_APPROVED);
 
         emit LegalStructureApproved(_structureType, _jurisdiction, _setupBudget, _facilitator);
+    }
+
+    /**
+     * @notice Authorizes funding for legal setup and advances phase.
+     * @dev Called by Timelock via Proposal execution.
+     */
+    function authorizeLegalSetupFunding(address _executor, uint256 _amount) external onlyOwner {
+        require(currentPhase == DaoPhase.LEGAL_STRUCTURE_APPROVED, "Legal structure not approved");
+        require(_amount <= legalStructure.setupBudget, "Exceeds authorized setup budget");
+
+        emit LegalSetupAuthorized(_executor, _amount);
+        _setPhase(DaoPhase.LEGAL_SETUP_IN_PROGRESS);
     }
 
     /**
