@@ -66,8 +66,14 @@ export default function ProposalsList() {
         }
     }
 
-    async function fetchProposals() {
+    const [oldestBlockScanned, setOldestBlockScanned] = useState(0);
+    const [scanStatus, setScanStatus] = useState("");
+
+    async function fetchProposals(loadScan = false) {
         setLoading(true);
+        if (loadScan) setScanStatus("Scanning deeper history...");
+        else setScanStatus("Scanning active proposals...");
+
         try {
             const READ_RPC = process.env.NEXT_PUBLIC_RPC_URL || "https://bsc-testnet.publicnode.com";
             const readProvider = new ethers.JsonRpcProvider(READ_RPC);
@@ -75,32 +81,44 @@ export default function ProposalsList() {
             const gov = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, readProvider);
             const latestBlock = await readProvider.getBlockNumber();
 
+            // If loading more, start from where we left off. Otherwise start from latest.
+            const startBlock = loadScan && oldestBlockScanned > 0 ? oldestBlockScanned : latestBlock;
+
+            const CHUNK_SIZE = 5000;
+            const SCAN_DEPTH = 200000; // ~7 Days of history per "Load"
+
             const filter = gov.filters.ProposalCreated();
             let events: any[] = [];
 
-            const CHUNK_SIZE = 2000; // Increased chunk size for faster heavy scan
-            const TOTAL_SEARCH = 50000; // ~40 hours history (Search much deeper to find rejected proposals)
+            let currentTo = startBlock;
+            const targetFrom = Math.max(0, startBlock - SCAN_DEPTH);
 
-            for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
-                const to = latestBlock - i;
-                const from = Math.max(0, to - CHUNK_SIZE);
+            // Scan backwards in chunks
+            while (currentTo > targetFrom) {
+                const currentFrom = Math.max(targetFrom, currentTo - CHUNK_SIZE);
                 try {
-                    const chunk = await gov.queryFilter(filter, from, to);
+                    // Update status for user feedback
+                    setScanStatus(`Scanning blocks ${currentFrom} - ${currentTo}...`);
+                    const chunk = await gov.queryFilter(filter, currentFrom, currentTo);
                     events = [...events, ...chunk];
                 } catch (e: any) {
-                    console.warn(`Error ${from}-${to}:`, e.message);
+                    console.warn(`Block scan error ${currentFrom}-${currentTo}:`, e.message);
                 }
+                currentTo = currentFrom;
+                if (currentTo <= 0) break;
             }
 
-            if (events.length === 0) console.warn("Scan complete. No events found.");
+            setOldestBlockScanned(currentTo); // Save progress for next "Load More"
 
-            const list: Proposal[] = await Promise.all(events.reverse().slice(0, 10).map(async (event) => {
+            if (events.length === 0) console.warn("No new events found in this range.");
+
+            const newProposals: Proposal[] = await Promise.all(events.reverse().map(async (event) => {
                 const args = (event as any).args;
                 const id = args[0];
                 const proposer = args[1];
                 const desc = args[8];
 
-                // Fetch details in parallel
+                // Fetch details in parallel (consider batching if too slow)
                 const [state, votes] = await Promise.all([
                     gov.state(id),
                     gov.proposalVotes(id)
@@ -116,11 +134,21 @@ export default function ProposalsList() {
                     abstainVotes: formatEther(votes[2]),
                 };
             }));
-            setProposals(list);
+
+            // Merge with existing if loading more, otherwise replace
+            // Deduplicate by ID just in case
+            setProposals(prev => {
+                const combined = loadScan ? [...prev, ...newProposals] : newProposals;
+                const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+                // Sort by ID descending (newest first)
+                return unique.sort((a, b) => Number(b.id) - Number(a.id));
+            });
+
         } catch (e) {
             console.error("Fetch Error", e);
         }
         setLoading(false);
+        setScanStatus("");
     }
 
     const filteredProposals = proposals.filter(p => {
@@ -202,7 +230,15 @@ export default function ProposalsList() {
                 </div>
             </div>
 
-            {loading && <div className="text-center py-12"><Loader2 className="animate-spin mx-auto text-purple-500" /> <span className="text-xs text-gray-500 mt-2 block">Scanning blockchain history...</span></div>}
+            {loading && !proposals.length && (
+                <div className="text-center py-12">
+                    <Loader2 className="animate-spin mx-auto text-purple-500 mb-4" size={40} />
+                    <h3 className="text-xl font-bold text-white mb-2">Syncing DAO State...</h3>
+                    <span className="text-sm text-gray-500 font-mono block bg-black/30 p-2 rounded max-w-sm mx-auto border border-white/10">
+                        {scanStatus || "Initializing connection..."}
+                    </span>
+                </div>
+            )}
 
             <div className="space-y-4">
                 {filteredProposals.map(p => {
