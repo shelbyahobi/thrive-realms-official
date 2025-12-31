@@ -49,7 +49,7 @@ contract ExecutionRegistry is Ownable {
 
     constructor() Ownable() {} 
 
-    // --- ENTITY MANAGEMENT (Phase 4) ---
+    // --- ENTITY MANAGEMENT (Phase 4 & Phase 3) ---
     function registerEntity(
         address _account,
         EntityType _type,
@@ -67,6 +67,24 @@ contract ExecutionRegistry is Ownable {
         });
         emit EntityRegistered(_account, _type, _name);
         emit EntityVerified(_account, true);
+    }
+
+    // Phase 3: Fiat Bridge Authorization
+    function authorizeFiatBridge(address _bridge, uint256 _cap) external onlyOwner {
+        profiles[_bridge].entityType = EntityType.FIAT_BRIDGE;
+        profiles[_bridge].isVerified = true;
+        // logic for caps would go here if storing on-chain, for now strictly entity typing
+        emit EntityVerified(_bridge, true);
+    }
+
+    // Phase 3: Execution Pod Creation
+    function createPod(address _podTreasury, address _executor, uint256 _cap) external onlyOwner {
+        profiles[_podTreasury].entityType = EntityType.EXECUTION_POD;
+        profiles[_podTreasury].isVerified = true;
+        
+        // Register the executor wallet as well if needed, or link them
+        // For MVP, we treat the podTreasury as the primary entity address
+        emit EntityRegistered(_podTreasury, EntityType.EXECUTION_POD, "Execution Pod");
     }
 
     // Legacy Setter (mapped to STANDARD type)

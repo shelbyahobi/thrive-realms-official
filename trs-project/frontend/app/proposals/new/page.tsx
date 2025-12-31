@@ -16,7 +16,7 @@ const CATEGORIES = [
 const EXECUTION_MODELS = ["Approved Company", "Approved Individual", "Internal DAO Execution"];
 
 // Proposal Types mapped to User's Architecture
-type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD' | 'LEGAL_STRUCTURE' | 'LEGAL_SETUP_FUNDING';
+type ProposalType = 'ENTITY' | 'FUNDING' | 'OPPORTUNITY' | 'FAST_TRACK' | 'FIAT_BRIDGE' | 'EXECUTION_POD' | 'LEGAL_STRUCTURE' | 'LEGAL_SETUP_FUNDING' | 'PROJECT_FUNDING';
 
 function NewProposalContent() {
     const { provider, signer, account } = useWallet();
@@ -72,6 +72,13 @@ function NewProposalContent() {
     const [setupExecutorType, setSetupExecutorType] = useState('Facilitator');
     const [setupExecutorWallet, setSetupExecutorWallet] = useState('');
     const [reportingCommitment, setReportingCommitment] = useState(false);
+
+    // Phase 3: Fiat Bridge & Pods
+    const [bridgeLicense, setBridgeLicense] = useState('');
+    const [bridgeCap, setBridgeCap] = useState('');
+    const [podMandate, setPodMandate] = useState('Geographic');
+    const [podTreasury, setPodTreasury] = useState('');
+    const [podCap, setPodCap] = useState('');
 
     useEffect(() => {
         if (provider && account) {
@@ -181,6 +188,24 @@ function NewProposalContent() {
             desc: "Fund the specific costs of incorporation (Unlocked by Phase 1).",
             icon: <Briefcase size={32} />,
             color: "emerald"
+        },
+        'FIAT_BRIDGE': {
+            title: "Fiat Bridge Authorization",
+            desc: "Authorize a regulated entity to act as a fiat on/off-ramp.",
+            icon: <Banknote size={32} />,
+            color: "cyan"
+        },
+        'EXECUTION_POD': {
+            title: "Execution Pod Creation",
+            desc: "Create a sub-DAO (Pod) with specific mandate and budget.",
+            icon: <Users size={32} />,
+            color: "pink"
+        },
+        'PROJECT_FUNDING': {
+            title: "Request Funding → Project Execution",
+            desc: "Fund a real-world project (Unlocked by Phase 3: Funding Enabled).",
+            icon: <Building2 size={32} />,
+            color: "blue"
         }
     };
 
@@ -206,6 +231,17 @@ function NewProposalContent() {
         else if (type === 'LEGAL_STRUCTURE') {
             md += `## Legal Structure Config\n- **Type:** ${legalType}\n- **Jurisdiction:** ${legalJurisdiction}\n- **Control Model:** ${legalControl}\n- **Setup Budget:** ${legalBudget} USDC/BNB\n- **Facilitator:** ${legalFacilitator || 'TBD'}\n\n`;
             md += `## Authorized Scope\n${legalScope.map(s => `- [x] ${s}`).join('\n')}`;
+        }
+        else if (type === 'FIAT_BRIDGE') {
+            md += `## Fiat Bridge Authorization\n- **Provider:** ${entityName} (${jurisdiction})\n- **License:** ${bridgeLicense}\n- **Wallet:** \`${entityAddress}\`\n- **Cap:** ${bridgeCap} USD\n`;
+        }
+        else if (type === 'EXECUTION_POD') {
+            md += `## Execution Pod Creation\n- **Name:** ${entityName}\n- **Mandate:** ${podMandate}\n- **Treasury:** \`${podTreasury}\`\n- **Executor:** \`${entityAddress}\`\n- **Budget Cap:** ${podCap} TRS\n`;
+        }
+        else if (type === 'PROJECT_FUNDING') {
+            md += `## Project Funding Request\n- **Total Budget:** ${budget} TRS\n- **Executor:** \`${executor}\`\n\n`;
+            md += `## Milestones\n`;
+            milestones.forEach((m, i) => md += `1. **${m.desc}**: ${m.amount} TRS\n`);
         }
         else if (type === 'LEGAL_SETUP_FUNDING') {
             md += `## Legal Setup Funding\n- **Requested Amount:** ${setupAmount} TRS\n- **Executor:** ${setupExecutorWallet} (${setupExecutorType})\n\n`;
@@ -250,23 +286,39 @@ function NewProposalContent() {
                 values = [0];
                 calldatas = [data]; // Fixed: variable name was implicitly assigned in original logic, here explicit
             }
-            else if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
-                // TYPE A/D/E: Execute registerEntity on Registry
-                // registerEntity(address, type, name, jurisdiction, metadata)
+            else if (type === 'ENTITY') {
+                // TYPE A: Execute registerEntity on Registry
                 const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
-
-                let typeEnum = 1; // STANDARD
-                if (type === 'FIAT_BRIDGE') typeEnum = 2;
-                if (type === 'EXECUTION_POD') typeEnum = 3;
-
                 const data = regInterface.encodeFunctionData("registerEntity", [
                     entityAddress,
-                    typeEnum,
+                    1, // STANDARD
                     entityName,
                     jurisdiction,
-                    entityUrl // passing URL as metadata for now
+                    entityUrl
                 ]);
-
+                targets = [CONTRACT_ADDRESSES.EXECUTION_REGISTRY];
+                values = [0];
+                calldatas = [data];
+            }
+            else if (type === 'FIAT_BRIDGE') {
+                // Phase 3: Authorize Bridge
+                const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
+                const data = regInterface.encodeFunctionData("authorizeFiatBridge", [
+                    entityAddress,
+                    ethers.parseEther(bridgeCap || "0") // Using Cap logic
+                ]);
+                targets = [CONTRACT_ADDRESSES.EXECUTION_REGISTRY];
+                values = [0];
+                calldatas = [data];
+            }
+            else if (type === 'EXECUTION_POD') {
+                // Phase 3: Create Pod
+                const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
+                const data = regInterface.encodeFunctionData("createPod", [
+                    podTreasury || entityAddress, // Treasury
+                    entityAddress, // Executor
+                    ethers.parseEther(podCap || "0")
+                ]);
                 targets = [CONTRACT_ADDRESSES.EXECUTION_REGISTRY];
                 values = [0];
                 calldatas = [data];
@@ -402,6 +454,10 @@ function NewProposalContent() {
                                 if (t === 'LEGAL_SETUP_FUNDING' && daoPhase < 1) { // 1 = LEGAL_STRUCTURE_APPROVED
                                     isDisabled = true;
                                     reason = "Requires Phase 1 (Legal Structure) Passed";
+                                }
+                                if (t === 'PROJECT_FUNDING' && daoPhase < 4) { // 4 = FUNDING_ENABLED (Phase 3 in user logic)
+                                    isDisabled = true;
+                                    reason = "Requires Funding Enabled (Phase 3 Completed)";
                                 }
 
                                 return (
