@@ -63,7 +63,9 @@ export default function ProposalDetailPage() {
         }
     }
 
-    async function fetchProposalDetails() {
+    const [scanRange, setScanRange] = useState<string>("");
+
+    async function fetchProposalDetails(forceDepth: number = 0) {
         if (!id) return;
         setLoading(true);
         try {
@@ -71,20 +73,37 @@ export default function ProposalDetailPage() {
             const READ_RPC = "https://bsc-testnet.publicnode.com";
             const readProvider = new ethers.JsonRpcProvider(READ_RPC);
             const gov = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, readProvider);
-
-            // Cannot filter by ID on-chain (non-indexed). Must fetch all and find.
-            // Using same chunk strategy as list page.
             const latestBlock = await readProvider.getBlockNumber();
+
+            // Check if proposal exists on-chain first (State check)
+            try {
+                await gov.state(id);
+            } catch (e) {
+                // If state() reverts, ID is invalid or doesn't exist.
+                console.warn("Proposal state check failed", e);
+                setProposal(null);
+                setLoading(false);
+                return;
+            }
+
             const filter = gov.filters.ProposalCreated();
 
             let foundEvent = null;
             const CHUNK_SIZE = 5000;
-            const TOTAL_SEARCH = 250000; // Search last ~9 days (Deep Scan)
+            // Default 300k (~10 days). If forceDepth > 0, add it to range.
+            const INITIAL_SEARCH = 300000;
+            const TOTAL_SEARCH = forceDepth > 0 ? forceDepth : INITIAL_SEARCH;
+
+            let currentTo = latestBlock;
+            const stopBlock = Math.max(0, latestBlock - TOTAL_SEARCH);
+
+            setScanRange(`Scanning ${latestBlock} -> ${stopBlock}...`);
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
                 const from = Math.max(0, to - CHUNK_SIZE);
                 try {
+                    setScanRange(`Scanning blocks ${from} - ${to}...`);
                     const chunk = await gov.queryFilter(filter, from, to);
                     // Client-side filter
                     const match = chunk.find((e: any) => e.args[0].toString() === id);
@@ -93,10 +112,13 @@ export default function ProposalDetailPage() {
                         break;
                     }
                 } catch (e) { console.warn("Chunk failed", e); }
+
+                if (from <= stopBlock) break;
             }
 
             if (!foundEvent) {
                 setLoading(false);
+                setScanRange(`Scanned last ${TOTAL_SEARCH} blocks. Event not found.`);
                 return;
             }
 
@@ -186,8 +208,32 @@ export default function ProposalDetailPage() {
         setVoting(false);
     }
 
-    if (loading) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-purple-500" /></div>;
-    if (!proposal) return <div className="p-20 text-center">Proposal Not Found</div>;
+    // RENDER HELPERS
+    if (loading) return (
+        <div className="p-20 text-center">
+            <Loader2 className="animate-spin mx-auto text-purple-500 mb-4" size={40} />
+            <h3 className="text-xl font-bold text-white">Searching Blockchain History...</h3>
+            <p className="text-gray-500 font-mono mt-2">{scanRange}</p>
+        </div>
+    );
+
+    if (!proposal) return (
+        <div className="p-20 text-center space-y-6">
+            <h2 className="text-2xl font-bold text-red-400">Proposal Data Not Found</h2>
+            <p className="text-gray-400 max-w-lg mx-auto">
+                We verified the proposal ID exists on-chain, but we couldn't find its creation event (Description/Details) in the last few days of blocks.
+            </p>
+            <div className="bg-black/30 p-4 rounded border border-white/10 font-mono text-xs text-gray-500 break-all mb-4">
+                Scan Status: {scanRange}
+            </div>
+            <button
+                onClick={() => fetchProposalDetails(1000000)} // Force 1M blocks (~30 days)
+                className="btn btn-primary px-8 py-3"
+            >
+                scan deeper history (30 days)
+            </button>
+        </div>
+    );
 
     const ProposalState = ["Pending", "Active", "Canceled", "Defeated", "Succeeded", "Queued", "Expired", "Executed"];
 
