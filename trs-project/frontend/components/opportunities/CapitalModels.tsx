@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, Banknote, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Banknote, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 
 export default function CapitalModels() {
     return (
