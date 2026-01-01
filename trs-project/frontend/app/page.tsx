@@ -47,21 +47,37 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
-      <section className="text-center mb-32 animate-in pt-16">
-        <h1 className="text-5xl md:text-7xl mb-6 font-bold text-white tracking-tight leading-tight font-serif">
-          Thrive Realms <br />
-          <span className="text-gray-400 italic font-light">Governance Protocol</span>
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 font-light leading-relaxed">
-          Decentralized governance infrastructure for transparent <br className="hidden md:block" /> real-world capital allocation.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4 mb-20">
-          <Link href="/proposals" className="btn btn-primary px-8 py-4 text-lg">
-            Enter Governance
-          </Link>
-          <Link href="/treasury" className="btn btn-secondary px-8 py-4 text-lg">
-            View Treasury
-          </Link>
+      {/* Hero Section */}
+      <section className="relative text-center mb-32 pt-24 pb-12">
+        {/* Dynamic Background Mesh */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] opacity-40 z-0 pointer-events-none">
+          <img src="/bg-mesh.png" alt="" className="w-full h-full object-contain animate-pulse-slow" />
+        </div>
+
+        <div className="relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-purple-400 text-sm font-bold mb-8 animate-bounce-slow">
+            <Activity size={16} /> Protocol Phase 5: Institutional Readiness
+          </div>
+
+          <h1 className="text-6xl md:text-8xl mb-8 font-bold text-white tracking-tight leading-tight font-serif drop-shadow-2xl">
+            Thrive Realms <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-green-400 italic font-light">
+              Governance Protocol
+            </span>
+          </h1>
+
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 font-light leading-relaxed drop-shadow-lg">
+            Decentralized governance infrastructure for transparent <br className="hidden md:block" /> real-world capital allocation and impact verification.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-6 mb-20">
+            <Link href="/proposals" className="btn btn-primary px-10 py-5 text-lg shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_50px_rgba(168,85,247,0.6)] hover:scale-105 transition duration-300 border-none bg-gradient-to-r from-purple-600 to-blue-600">
+              Enter Governance <ArrowRight className="ml-2 inline" size={20} />
+            </Link>
+            <Link href="/treasury" className="px-10 py-5 text-lg rounded-xl font-bold bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 backdrop-blur-md transition duration-300">
+              View Treasury
+            </Link>
+          </div>
         </div>
       </section>
 

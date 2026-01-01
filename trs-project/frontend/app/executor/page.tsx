@@ -7,6 +7,7 @@ import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
 import { ShieldCheck, TrendingUp, Briefcase, FileText, Users, Scale, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import ExecutorDirectory from '../../components/executor/ExecutorDirectory';
+import WalletGuard from '../../components/layout/WalletGuard';
 
 function ExecutorDashboardContent() {
     const { provider, account } = useWallet();
@@ -230,8 +231,10 @@ function ExecutorDashboardContent() {
 
 export default function ExecutorDashboardPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <ExecutorDashboardContent />
-        </Suspense>
+        <WalletGuard>
+            <Suspense fallback={<div>Loading...</div>}>
+                <ExecutorDashboardContent />
+            </Suspense>
+        </WalletGuard>
     );
 }
