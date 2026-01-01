@@ -349,9 +349,11 @@ function NewProposalContent() {
                     <div className="h-px bg-white/10 my-6" />
 
                     {/* ENTITY FIELDS */}
-                    {type === 'ENTITY' && (
+                    {(type === 'ENTITY' || type === 'FIAT_BRIDGE') && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-blue-400">Execution Partner Info</h3>
+                            <h3 className="text-lg font-bold text-blue-400">
+                                {type === 'FIAT_BRIDGE' ? 'Fiat Gateway Details' : 'Execution Partner Info'}
+                            </h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Entity Name</label>
@@ -369,13 +371,30 @@ function NewProposalContent() {
                                     {JURISDICTIONS.map(j => <option key={j} value={j}>{j}</option>)}
                                 </select>
                             </div>
+                            {type === 'FIAT_BRIDGE' && (
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">License Number (VASP/MSB)</label>
+                                    <input value={bridgeLicense} onChange={e => setBridgeLicense(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Registration Number" />
+                                </div>
+                            )}
                         </div>
                     )}
 
-                    {/* FUNDING FIELDS */}
-                    {(type === 'FUNDING' || type === 'PROJECT_FUNDING') && (
+                    {/* FUNDING FIELDS (Standard, Fast Track, Project) */}
+                    {(type === 'FUNDING' || type === 'PROJECT_FUNDING' || type === 'FAST_TRACK') && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-green-400">Funding Request</h3>
+                            <h3 className="text-lg font-bold text-green-400">
+                                {type === 'FAST_TRACK' ? 'Fast Track Funding Request' : 'Funding Request'}
+                            </h3>
+                            {type === 'FAST_TRACK' && (
+                                <div className="p-4 bg-orange-900/20 border border-orange-500/50 rounded flex items-center gap-3">
+                                    <ShieldCheck className="text-orange-500" />
+                                    <div className="text-sm">
+                                        <div className="text-orange-200 font-bold">Reputation Score: {reputation}</div>
+                                        <div className="text-gray-400">Requires 80+ for Fast Track processing.</div>
+                                    </div>
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Total Ask (TRS)</label>
@@ -411,6 +430,85 @@ function NewProposalContent() {
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Contact (Email/Phone)</label>
                                     <input value={oppContact} onChange={e => setOppContact(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="email or +1234567890" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* LEGAL STRUCTURE FIELDS */}
+                    {type === 'LEGAL_STRUCTURE' && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-yellow-400">Legal Entity Definition</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Legal Form</label>
+                                    <select value={legalType} onChange={e => setLegalType(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option>DAO-Controlled LLC</option>
+                                        <option>Swiss Association</option>
+                                        <option>UNA (Unincorporated Nonprofit)</option>
+                                        <option>Cayman Foundation</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Jurisdiction</label>
+                                    <select value={legalJurisdiction} onChange={e => setLegalJurisdiction(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option value="Wyoming (DAO-LLC)">Wyoming (DAO-LLC)</option>
+                                        <option value="Switzerland">Switzerland</option>
+                                        <option value="Cayman Islands">Cayman Islands</option>
+                                        <option value="Marshall Islands">Marshall Islands</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Facilitator / Law Firm</label>
+                                    <input value={legalFacilitator} onChange={e => setLegalFacilitator(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Legal Partner Name" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Setup Budget Cap (TRS)</label>
+                                    <input type="number" value={legalBudget} onChange={e => setLegalBudget(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* LEGAL SETUP FUNDING FIELDS */}
+                    {type === 'LEGAL_SETUP_FUNDING' && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-emerald-400">Legal Setup Funding</h3>
+                            <div className="p-4 bg-emerald-900/20 border border-emerald-500/50 rounded mb-4">
+                                <div className="text-sm font-bold text-emerald-200">Active Mandate: {activeLegalStructure?.type ? "Defined" : "None"}</div>
+                                <div className="text-xs text-gray-400">Est. Budget: {activeLegalStructure?.budget || 0} TRS | Jurisdiction: {activeLegalStructure?.jurisdiction || "N/A"}</div>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Expense Breakdown</label>
+                                {expenseBreakdown.map((item, i) => (
+                                    <div key={i} className="flex gap-2 mb-2">
+                                        <span className="p-2 bg-white/5 rounded text-gray-400 w-24 text-xs flex items-center">{item.category}</span>
+                                        <input value={item.desc} onChange={e => { const n = [...expenseBreakdown]; n[i].desc = e.target.value; setExpenseBreakdown(n) }} className="flex-grow bg-black/50 border border-white/10 rounded p-2 text-white" placeholder="Description" />
+                                        <input type="number" value={item.amount} onChange={e => { const n = [...expenseBreakdown]; n[i].amount = e.target.value; setExpenseBreakdown(n) }} className="w-24 bg-black/50 border border-white/10 rounded p-2 text-white" placeholder="TRS" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EXECUTION POD FIELDS */}
+                    {type === 'EXECUTION_POD' && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-pink-400">Execution Pod Configuration</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Pod Mandate Type</label>
+                                    <select value={podMandate} onChange={e => setPodMandate(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option>Geographic (Regional)</option>
+                                        <option>Sector Specific (e.g. Ag)</option>
+                                        <option>Investment Committee</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Pod Treasury Cap (TRS)</label>
+                                    <input type="number" value={podCap} onChange={e => setPodCap(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
                                 </div>
                             </div>
                         </div>
