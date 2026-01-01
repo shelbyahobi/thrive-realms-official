@@ -37,6 +37,11 @@ contract ReputationRegistry is Ownable {
     event ScoreUpdated(address indexed executor, string component, uint32 newScore);
     event FlagUpdated(address indexed executor, bool isFlagged);
     event ThresholdSet(uint256 indexed typeId, uint32 minExec, uint32 minReport, uint32 minDispute);
+    event PolicyUpdated(string newHash);
+
+    // IPFS Hash of the Reputation Constitution
+    string public policyHash;
+
 
     modifier onlyAuthorized() {
         require(authorizedCallers[msg.sender] || msg.sender == owner(), "Not Authorized");
@@ -52,6 +57,18 @@ contract ReputationRegistry is Ownable {
 
     function setAuthorizedCaller(address _caller, bool _status) external onlyOwner {
         authorizedCallers[_caller] = _status;
+    }
+
+    function setPolicyHash(string memory _hash) external onlyOwner {
+        policyHash = _hash;
+        emit PolicyUpdated(_hash);
+    }
+
+    /**
+     * @notice Allow Factory to register new Projects as authorized scorers.
+     */
+    function grantAutomationRole(address _automationContract) external onlyAuthorized {
+        authorizedCallers[_automationContract] = true;
     }
 
     /**

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./ReputationRegistry.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
 
 contract ProjectEscrow is Ownable, Pausable {
     using SafeERC20 for IERC20;
@@ -25,6 +26,7 @@ contract ProjectEscrow is Ownable, Pausable {
     string public region;
     address public executor;
     IERC20 public budgetToken;
+    ReputationRegistry public reputationRegistry;
     
     Milestone[] public milestones;
     
@@ -47,6 +49,7 @@ contract ProjectEscrow is Ownable, Pausable {
         address _executor,
         IERC20 _budgetToken,
         address _owner,
+        address _reputationRegistry,
         uint256[] memory _milestoneAmounts,
         string[] memory _milestoneDescriptions
     ) Ownable() {
@@ -59,6 +62,7 @@ contract ProjectEscrow is Ownable, Pausable {
         region = _region;
         executor = _executor;
         budgetToken = _budgetToken;
+        reputationRegistry = ReputationRegistry(_reputationRegistry);
         
         for (uint256 i = 0; i < _milestoneAmounts.length; i++) {
             milestones.push(Milestone({
@@ -80,6 +84,10 @@ contract ProjectEscrow is Ownable, Pausable {
         require(bytes(m.reportURI).length == 0, "Report already submitted");
 
         m.reportURI = _reportURI;
+        
+        // AUTOMATION: +2 Reporting Score
+        try reputationRegistry.updateScore(executor, 1, 2) {} catch {}
+
         emit ReportSubmitted(index, _reportURI);
     }
 
@@ -93,6 +101,10 @@ contract ProjectEscrow is Ownable, Pausable {
         m.paid = true;
         
         budgetToken.safeTransfer(executor, m.amount);
+
+        // AUTOMATION: +5 Execution Score
+        try reputationRegistry.updateScore(executor, 0, 5) {} catch {}
+
         emit MilestoneReleased(index, m.amount);
     }
 

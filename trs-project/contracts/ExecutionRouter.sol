@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./ReputationRegistry.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -13,13 +14,15 @@ contract ExecutionRouter is Ownable {
     address public treasurySafe;
     address public operationsSafe;
     ExecutionRegistry public registry;
+    ReputationRegistry public reputationRegistry;
 
     event ProjectCreated(address indexed escrow, string projectId, address executor);
 
-    constructor(address _treasurySafe, address _operationsSafe, address _registry) Ownable() {
+    constructor(address _treasurySafe, address _operationsSafe, address _registry, address _reputationRegistry) Ownable() {
         treasurySafe = _treasurySafe;
         operationsSafe = _operationsSafe;
         registry = ExecutionRegistry(_registry);
+        reputationRegistry = ReputationRegistry(_reputationRegistry);
     }
 
     function updateSafes(address _treasurySafe, address _operationsSafe) external onlyOwner {
@@ -47,8 +50,12 @@ contract ExecutionRouter is Ownable {
         ProjectEscrow escrow = new ProjectEscrow(
             _projectId, _title, _category, _country, _region, _executor, _budgetToken,
             msg.sender, // The Timelock becomes the owner to control releases
+            address(reputationRegistry), // Phase 4
             _milestoneAmounts, _milestoneDescriptions
         );
+        
+        // Automation
+        try reputationRegistry.grantAutomationRole(address(escrow)) {} catch {}
 
         // Fund Escrow
         if (_totalBudget > 0) {

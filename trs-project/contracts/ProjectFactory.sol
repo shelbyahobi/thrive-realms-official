@@ -76,10 +76,16 @@ contract ProjectFactory {
             _region,
             _executor,
             _budgetToken,
+
             msg.sender, // Owner of Escrow (Timelock)
+            address(reputationRegistry), // Phase 4 Automation
             _milestoneAmounts,
             _milestoneDescriptions
         );
+
+        // --- AUTOMATION AUTHORIZATION ---
+        // Allow the new project to update reputation scores (if Factory is authorized)
+        try reputationRegistry.grantAutomationRole(address(newProject)) {} catch {}
 
         // --- FUNDING ---
         if (totalBudget > 0) {

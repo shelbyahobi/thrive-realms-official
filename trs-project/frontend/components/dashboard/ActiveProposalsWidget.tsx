@@ -43,10 +43,9 @@ export default function ActiveProposalsWidget() {
             const filter = gov.filters.ProposalCreated();
             let events: any[] = [];
 
-            // Scan last 100k blocks in chunks to avoid RPC timeouts
-            // Scan last ~2.5 hours blocks in chunks to avoid RPC timeouts
-            const CHUNK_SIZE = 1500;
-            const TOTAL_SEARCH = 3000;
+            // Scan last 300k blocks (approx 10 days) to match Proposal Details page
+            const CHUNK_SIZE = 5000;
+            const TOTAL_SEARCH = 300000;
 
             for (let i = 0; i < TOTAL_SEARCH; i += CHUNK_SIZE) {
                 const to = latestBlock - i;
