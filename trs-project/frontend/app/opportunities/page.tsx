@@ -1,293 +1,65 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ethers, formatEther } from 'ethers';
-import { useWallet } from '../../hooks/useWallet';
-import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../lib/contracts';
-import { Shield, Lock, Briefcase, Zap, Globe, Sprout, Building, FileText, MapPin, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-import OpportunityForm from '../../components/opportunities/OpportunityForm';
-import SuccessCarousel from '../../components/opportunities/SuccessCarousel';
-import LocalRepLocator from '../../components/opportunities/LocalRepLocator';
+import { ArrowRight, Globe, Shield } from 'lucide-react';
+import OpportunityExplorer from '../../components/opportunities/OpportunityExplorer';
+import CapitalModels from '../../components/opportunities/CapitalModels';
+import RolesWanted from '../../components/opportunities/RolesWanted';
 
 export default function OpportunitiesPage() {
-    const { account, provider } = useWallet();
-    const [tier, setTier] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (account && provider) {
-            checkAccess();
-        } else {
-            setLoading(false);
-        }
-    }, [account, provider]);
-
-    async function checkAccess() {
-        if (!provider || !account) return;
-        try {
-            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
-            const bal = await token.balanceOf(account);
-            const balNum = parseFloat(formatEther(bal));
-
-            let t = "Guest";
-            if (balNum >= 24000) t = "Founder";
-            else if (balNum >= 12000) t = "Voter";
-            else if (balNum >= 1200) t = "Member";
-
-            setTier(t);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    if (loading) {
-        return <div className="p-20 text-center text-gray-500 animate-pulse">Scanning Bio-Signature...</div>;
-    }
-
-    // Public View (Ungated) - Educational Content is visible to everyone
-    // We only gate specific actions or sensitive data lists
-
     return (
         <div className="container mx-auto px-4 py-12">
 
-            {/* Header - Mission First */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                <div>
-                    <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-                        <Globe className="text-emerald-400" size={40} />
-                        Opportunities with Purpose
-                    </h1>
-                    <p className="text-gray-400 max-w-2xl font-light text-lg">
-                        Funding community-led businesses that improve livelihoods, financial independence, and local resilience in underserved regions.
-                    </p>
-                    <p className="text-xs text-gray-500 mt-2 border-l-2 border-emerald-500/30 pl-3">
-                        Thrive Realm prioritizes real economic activity in regions where access to capital is limited, enabling local representatives to build sustainable businesses with global transparency.
-                    </p>
+            {/* HERO SECTION */}
+            <header className="text-center py-20 px-4 mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-900/20 border border-blue-500/30 text-blue-400 text-sm font-bold mb-8 animate-in fade-in slide-in-from-bottom-4">
+                    <Globe size={16} /> Global Execution Network
                 </div>
-                {account && (
-                    <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
-                        <Shield className={tier === 'Member' ? 'text-gray-400' : 'text-purple-400'} size={20} />
-                        <span className="text-sm text-gray-300">
-                            Viewing as <span className="font-bold text-white uppercase">{tier}</span>
-                        </span>
-                    </div>
-                )}
-            </div>
-
-            {/* Guest Banner */}
-            {(!account || tier === 'Guest') && (
-                <div className="bg-gradient-to-r from-emerald-900/40 to-black border border-emerald-500/30 p-6 rounded-xl mb-12 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-32 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none"></div>
-                    <div className="relative z-10">
-                        <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                            <Lock size={20} className="text-emerald-400" />
-                            Impact Capital Access
-                        </h3>
-                        <p className="text-gray-300 mb-6 max-w-3xl">
-                            Welcome to the Hub. You are viewing the public version.
-                            To vote on deals or access full due diligence reports on our Community Anchors, please connect your wallet.
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-emerald-200 font-mono bg-black/40 px-4 py-2 rounded inline-block">
-                            &gt; Waiting for Connect...
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Featured Community Anchor (New Section) */}
-            <div className="mb-12">
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Featured Community Anchor</h3>
-                <div className="glass-card p-6 border border-white/10 bg-white/5 grid grid-cols-1 md:grid-cols-3 gap-6 items-center relative overflow-hidden">
-                    <div className="absolute -right-10 -top-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
-
-                    <div className="md:col-span-2">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-xs">
-                                LK
-                            </div>
-                            <div>
-                                <h4 className="text-white font-bold text-lg">Lagos Agri-Cooperative</h4>
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <MapPin size={10} /> Lagos, Nigeria
-                                    <span className="text-emerald-400 flex items-center gap-1 border border-emerald-500/30 px-1 rounded bg-emerald-500/10">
-                                        <CheckCircle size={8} /> Wallet Verified
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-gray-300 text-sm italic mb-4">
-                            "We organize 50+ smallholder farmers to pool resources for fertilizer and mechanized tools. Our goal is 100% local ownership within 3 years."
-                        </p>
-                        <div className="flex gap-4 text-xs font-mono">
-                            <div className="bg-black/40 px-3 py-1 rounded">
-                                <span className="text-gray-500 block">IMPACT</span>
-                                <span className="text-white text-lg">200+</span> Households
-                            </div>
-                            <div className="bg-black/40 px-3 py-1 rounded">
-                                <span className="text-gray-500 block">ROLE</span>
-                                <span className="text-amber-400">Co-op Leader</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="text-right hidden md:block border-l border-white/10 pl-6 h-full">
-                        <h5 className="text-gray-500 text-xs uppercase mb-1">Current Ask</h5>
-                        <p className="text-2xl font-bold text-white mb-1">$12,000</p>
-                        <p className="text-xs text-emerald-400 mb-4">For Solar Irrigation Pump</p>
-                        <button className="text-xs bg-white text-black font-bold px-3 py-1 rounded hover:bg-gray-200 transition">
-                            View Proposal &rarr;
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Navigation to Intelligence Vault */}
-            <div className="mb-10 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 p-6 rounded-xl flex items-center justify-between">
-                <div>
-                    <h3 className="text-xl font-bold text-white mb-1">Looking for the Intelligence Vault?</h3>
-                    <p className="text-gray-400 text-sm">
-                        View, rate, and audit all submitted opportunities in the transparency registry.
-                    </p>
-                </div>
-                <Link href="/vault" className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2 transition">
-                    Enter Vault <Globe size={16} />
-                </Link>
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-
-                {/* Left: Success Carousel & Local Rep */}
-                <div className="lg:col-span-2 flex flex-col gap-8">
-
-                    {/* Success Stories Carousel */}
-                    <div>
-                        <h3 className="text-xl font-bold text-white mb-4">Recent Wins</h3>
-                        <SuccessCarousel />
-                    </div>
-
-                    {/* Local Representative Locator */}
-                    <LocalRepLocator />
-
-                    {/* Investment Mandate Summary */}
-                    <div className="glass-card p-6 bg-gradient-to-br from-white/5 to-transparent border-white/10 mt-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-bold text-white">Investment Mandate (Phase 1)</h3>
-                            <Link href="/governance/mandate" className="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded transition">
-                                View Full Policy
-                            </Link>
-                        </div>
-                        <p className="text-gray-400 leading-relaxed mb-6">
-                            Thrive Realm prioritizes projects in low-income and emerging regions where access to capital is structurally limited.
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 className="text-sm font-bold text-white mb-2">Priority Regions:</h4>
-                                <ul className="space-y-1 text-xs text-gray-500">
-                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Sub-Saharan Africa</li>
-                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Latin America</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-bold text-white mb-2">&nbsp;</h4>
-                                <ul className="space-y-1 text-xs text-gray-500">
-                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> South Asia</li>
-                                    <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> MENA Region</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right: The New Form */}
-                <OpportunityForm />
-            </div>
-
-            {/* Opportunity Classes */}
-            <h3 className="text-xl font-bold text-white mb-6 pl-2 border-l-4 border-emerald-500">Impact Opportunity Classes</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-                <CategoryCard
-                    icon={<Sprout size={32} className="text-green-400" />}
-                    title="Community Agriculture"
-                    roi="Hybrid (Social + 5%)"
-                    budget="$2k - $15k"
-                    desc="Regenerative farming, food security, and cooperative supply chains."
-                />
-
-                <CategoryCard
-                    icon={<Zap size={32} className="text-yellow-400" />}
-                    title="Energy Access"
-                    roi="Financial (8-12%)"
-                    budget="$10k - $50k"
-                    desc="Solar micro-grids and clean energy infrastructure for off-grid communities."
-                />
-
-                <CategoryCard
-                    icon={<Building size={32} className="text-blue-400" />}
-                    title="Affordable Housing"
-                    roi="Social (Low Yield)"
-                    budget="$20k - $100k"
-                    desc="Sustainable local construction using local materials and labor."
-                />
-
-                <CategoryCard
-                    icon={<Globe size={32} className="text-cyan-400" />}
-                    title="Water & Sanitation"
-                    roi="Social Impact"
-                    budget="$1k - $10k"
-                    desc="Clean water boreholes, irrigation, and waste management systems."
-                />
-
-                <CategoryCard
-                    icon={<Briefcase size={32} className="text-purple-400" />}
-                    title="Local Manufacturing"
-                    roi="Financial (High Yield)"
-                    budget="$5k - $25k"
-                    desc="SME scaling, machinery acquisition, and craft cooperatives."
-                />
-            </div>
-
-            <div className="mt-12 p-8 text-center border-t border-white/5">
-                <p className="text-gray-500 italic text-sm mb-4">
-                    "Capital goes where it is invited, but stays where it is treated well."
+                <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 font-serif leading-tight">
+                    A Marketplace for <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400">
+                        Real-World Execution
+                    </span>
+                </h1>
+                <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+                    Opportunities are proposed, vetted, funded, and executed through on-chain governance.
+                    <br className="hidden md:block" />
+                    We build the framework; you build the future.
                 </p>
-                <Link href="/opportunities/lite" className="text-xs text-gray-600 hover:text-gray-400 underline">
-                    Switch to Low-Data Mode (Lite Version)
-                </Link>
-            </div>
+                <div className="flex flex-wrap justify-center gap-6">
+                    <Link href="/proposals/new?type=entity"
+                        className="px-8 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 transition shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center gap-2">
+                        Register as Partner <ArrowRight size={20} />
+                    </Link>
+                    <Link href="/governance"
+                        className="px-8 py-4 bg-white/5 text-white border border-white/20 font-bold text-lg rounded-full hover:bg-white/10 transition">
+                        View Governance
+                    </Link>
+                </div>
+            </header>
+
+            {/* 1. FRAMEWORK EXPLORER */}
+            <OpportunityExplorer />
+
+            {/* 2. CAPITAL MODELS */}
+            <CapitalModels />
+
+            {/* 3. ROLES WANTED */}
+            <RolesWanted />
+
+            {/* 4. FINAL CTA */}
+            <section className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-white/10 rounded-3xl p-12 text-center my-20">
+                <h2 className="text-3xl font-bold text-white mb-4">Ready to Propose a Framework?</h2>
+                <p className="text-gray-400 max-w-xl mx-auto mb-8">
+                    If you fit one of these archetypes, or have a unique model for deploying capital, register your entity to begin the vetting process.
+                </p>
+                <div className="flex justify-center gap-4">
+                    <Link href="/proposals/new?type=entity" className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition flex items-center gap-2">
+                        <Shield size={18} /> Begin Verification
+                    </Link>
+                </div>
+            </section>
+
         </div>
     );
-}
-
-function CategoryCard({ icon, title, roi, budget, desc }: { icon: any, title: string, roi: string, budget: string, desc: string }) {
-    return (
-        <div className="glass-card p-6 border border-white/5 hover:border-white/10 transition group">
-            <div className="flex justify-between items-start mb-4">
-                <div className="bg-white/5 p-3 rounded-lg group-hover:bg-white/10 transition">
-                    {icon}
-                </div>
-                <div className="text-right">
-                    <span className="block text-[10px] text-gray-500 uppercase">Target ROI</span>
-                    <span className="text-xs font-mono text-emerald-400">
-                        {roi}
-                    </span>
-                </div>
-            </div>
-            <h4 className="text-lg font-bold text-white mb-1 group-hover:text-emerald-300 transition">{title}</h4>
-            <div className="text-xs text-gray-500 mb-2 font-mono">
-                Budget: <span className="text-gray-300">{budget}</span>
-            </div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-4 min-h-[40px]">
-                {desc}
-            </p>
-            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="w-0 h-full bg-emerald-500 transition-all group-hover:w-1/3"></div>
-            </div>
-        </div>
-    )
 }
