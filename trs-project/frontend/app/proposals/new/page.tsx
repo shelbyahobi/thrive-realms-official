@@ -60,180 +60,77 @@ function NewProposalContent() {
     const [legalBudget, setLegalBudget] = useState('');
     const [legalFacilitator, setLegalFacilitator] = useState('');
 
-    // Phase 2: Legal Setup Funding
-    const [setupAmount, setSetupAmount] = useState('');
-    const [expenseBreakdown, setExpenseBreakdown] = useState<{ category: string, desc: string, amount: string }[]>([
-        { category: 'Legal', desc: 'Incorporation', amount: '' },
-        { category: 'Banking', desc: 'Account Setup', amount: '' },
-        { category: 'Compliance', desc: 'Advisory', amount: '' }
-    ]);
-    const [setupExecutorType, setSetupExecutorType] = useState('Facilitator');
-    const [setupExecutorWallet, setSetupExecutorWallet] = useState('');
-    const [reportingCommitment, setReportingCommitment] = useState(false);
+    // LEGAL & POD ENHANCED STATE
+    const [legalName, setLegalName] = useState('');
+    const [legalGov, setLegalGov] = useState('Token Voting');
+    const [legalOpAgreement, setLegalOpAgreement] = useState('');
+    const [podName, setPodName] = useState('');
+    const [podAdmin, setPodAdmin] = useState('');
+    const [podThreshold, setPodThreshold] = useState('3/5 Multisig');
 
-    // Phase 3: Fiat Bridge & Pods
-    const [bridgeLicense, setBridgeLicense] = useState('');
-    const [bridgeCap, setBridgeCap] = useState('');
-    const [podMandate, setPodMandate] = useState('Geographic');
-    const [podTreasury, setPodTreasury] = useState('');
-    const [podCap, setPodCap] = useState('');
+    // TEMPLATE SPECIFIC STATE
+    // Agri
+    const [agriCountry, setAgriCountry] = useState('');
+    const [agriDuration, setAgriDuration] = useState('');
+    const [agriFundingModel, setAgriFundingModel] = useState('Loan');
 
-    useEffect(() => {
-        if (provider && account) {
-            checkEligibility();
-            fetchReputation();
-            fetchDaoState();
-        }
-        const t = searchParams.get('type');
-        if (t === 'entity') setType('ENTITY');
-        if (t === 'funding') setType('FUNDING');
-        if (t === 'opportunity') setType('OPPORTUNITY');
-        if (t === 'fast_track') setType('FAST_TRACK');
-    }, [provider, account, searchParams]);
+    // SME
+    const [smeName, setSmeName] = useState('');
+    const [smeLegalStatus, setSmeLegalStatus] = useState('Registered');
+    const [smeFundingModel, setSmeFundingModel] = useState('Loan');
+    const [smeEquity, setSmeEquity] = useState('');
+    const [smeRepayment, setSmeRepayment] = useState('');
 
-    async function fetchDaoState() {
-        if (!provider) return;
-        try {
-            const govSettings = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNANCE_SETTINGS, CONTRACT_ABIS.GovernanceSettings, provider);
-            const phase = await govSettings.currentPhase();
-            setDaoPhase(Number(phase));
-            const structure = await govSettings.getLegalStructure();
-            setActiveLegalStructure({
-                type: Number(structure.structureType),
-                jurisdiction: structure.jurisdiction,
-                budget: ethers.formatEther(structure.setupBudget),
-                facilitator: structure.facilitator
-            });
-        } catch (e) { console.error(e); }
-    }
+    // Research
+    const [resInst, setResInst] = useState('');
+    const [resArea, setResArea] = useState('');
+    const [resIp, setResIp] = useState('Open Source');
 
-    async function checkEligibility() {
-        if (!provider || !account) return;
-        try {
-            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, provider);
-            const bal = await token.getVotes(account);
-            const balNum = parseFloat(ethers.formatEther(bal));
-            if (balNum >= 25000) setUserTier('Founder');
-            else if (balNum >= 12000) setUserTier('Voter');
-            else setUserTier('Member');
-        } catch (e) { console.error(e); }
-    }
+    // Infrastructure
+    const [infraType, setInfraType] = useState('Physical');
+    const [infraMaint, setInfraMaint] = useState('');
 
-    async function fetchReputation() {
-        if (!provider || !account) return;
-        try {
-            const registry = new ethers.Contract(CONTRACT_ADDRESSES.REPUTATION_REGISTRY, CONTRACT_ABIS.ReputationRegistry, provider);
-            const score = await registry.getScore(account);
-            setReputation(Number(score));
-        } catch (e) { console.error(e); }
-    }
-
-    // --- VALIDATION LOGIC ---
-    const validateEntity = () => {
-        if (!entityName || !entityAddress || !jurisdiction) {
-            alert("Please complete all Entity fields (Name, Address, Jurisdiction).");
-            return false;
-        }
-        if (!ethers.isAddress(entityAddress)) {
-            alert("Invalid Entity Wallet Address");
-            return false;
-        }
-        return true;
-    };
-
-    const validateFunding = () => {
-        if (Number(budget) <= 0 || !executor) {
-            alert("Budget must be > 0 and Executor required.");
-            return false;
-        }
-        if (!ethers.isAddress(executor)) {
-            alert("Invalid Executor Address");
-            return false;
-        }
-        return true;
-    };
-
-    const validateOpportunity = () => {
-        const phoneRegex = /^\+?[0-9]{7,15}$/;
-        // Simple check: Email (@) OR Phone (+)
-        if (oppContact && !oppContact.includes('@') && !phoneRegex.test(oppContact)) {
-            alert("Contact must be valid Email or Phone (+1234567890)");
-            return false;
-        }
-        if (!oppRegion || !oppMarket) {
-            alert("Please fill in Market & Region info");
-            return false;
-        }
-        return true;
-    };
-
-    const handleNext = () => {
-        if (step === 1) {
-            setStep(2);
-            return;
-        }
-    };
-
-    const handleSubmit = () => {
-        // Run validation based on type
-        if (type === 'ENTITY' && !validateEntity()) return;
-        if ((type === 'FUNDING' || type === 'PROJECT_FUNDING') && !validateFunding()) return;
-        if (type === 'OPPORTUNITY' && !validateOpportunity()) return;
-
-        submitProposal();
-    };
-
-    // FIXED: Static classes to avoid Tailwind build errors with dynamic template literals
-    const typeConfig: Record<ProposalType, { title: string, desc: string, icon: any, activeClasses: string, textClass: string }> = {
-        'ENTITY': {
-            title: "Standard Verification", desc: "Whitelist a new Execution Partner.", icon: <Building2 />,
-            activeClasses: "bg-blue-600/20 border-blue-500 shadow-lg shadow-blue-500/30", textClass: "text-blue-400"
-        },
-        'FUNDING': {
-            title: "Request Funding", desc: "Propose a funded mandate.", icon: <Wallet />,
-            activeClasses: "bg-green-600/20 border-green-500 shadow-lg shadow-green-500/30", textClass: "text-green-400"
-        },
-        'OPPORTUNITY': {
-            title: "List Opportunity", desc: "Submit to Intelligence Vault.", icon: <Globe />,
-            activeClasses: "bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/30", textClass: "text-purple-400"
-        },
-        'FAST_TRACK': {
-            title: "Fast Track Funding", desc: "Accelerated funding.", icon: <ShieldCheck />,
-            activeClasses: "bg-orange-600/20 border-orange-500 shadow-lg shadow-orange-500/30", textClass: "text-orange-400"
-        },
-        'FIAT_BRIDGE': {
-            title: "Fiat Bridge Authorization", desc: "Authorize On/Off-Ramp.", icon: <Banknote />,
-            activeClasses: "bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/30", textClass: "text-cyan-400"
-        },
-        'EXECUTION_POD': {
-            title: "Execution Pod Creation", desc: "Spin up sub-DAO Pod.", icon: <Users />,
-            activeClasses: "bg-pink-600/20 border-pink-500 shadow-lg shadow-pink-500/30", textClass: "text-pink-400"
-        },
-        'LEGAL_STRUCTURE': {
-            title: "Legal Establishment", desc: "Define DAO Legal Entity.", icon: <Scale />,
-            activeClasses: "bg-yellow-600/20 border-yellow-500 shadow-lg shadow-yellow-500/30", textClass: "text-yellow-400"
-        },
-        'LEGAL_SETUP_FUNDING': {
-            title: "Legal Funding", desc: "Fund incorporation costs.", icon: <Briefcase />,
-            activeClasses: "bg-emerald-600/20 border-emerald-500 shadow-lg shadow-emerald-500/30", textClass: "text-emerald-400"
-        },
-        'PROJECT_FUNDING': {
-            title: "Project Execution", desc: "Fund real-world project.", icon: <Building2 />,
-            activeClasses: "bg-blue-600/20 border-blue-500 shadow-lg shadow-blue-500/30", textClass: "text-blue-400"
-        }
-    };
+    const template = searchParams.get('template');
 
     const generateMarkdown = () => {
         const date = new Date().toISOString().split('T')[0];
-        let md = `# ${title}\n\n| Metadata | |\n| :--- | :--- |\n| **Type** | ${type} |\n| **Author** | ${account} |\n| **Date** | ${date} |\n\n## Executive Summary\n${summary}\n\n`;
-        if (type === 'ENTITY' || type === 'FIAT_BRIDGE' || type === 'EXECUTION_POD') {
-            md += `## Entity Details\n- **Name:** ${entityName}\n- **Wallet:** \`${entityAddress}\`\n- **Jurisdiction:** ${jurisdiction}\n- **Website:** ${entityUrl}\n\n## Mandate Scope\nAuthorized Execution Entity.`;
-        } else if (type === 'FUNDING' || type === 'FAST_TRACK' || type === 'PROJECT_FUNDING') {
-            md += `## Funding Request\n- **Total Budget:** ${budget} TRS\n- **Executor:** \`${executor}\`\n\n## Milestones\n`;
+        let md = `# ${title}\n\n| Metadata | |\n| :--- | :--- |\n| **Type** | ${type} |\n| **Template** | ${template || 'Standard'} |\n| **Author** | ${account} |\n| **Date** | ${date} |\n\n## Executive Summary\n${summary}\n\n`;
+
+        if (type === 'ENTITY' || type === 'FIAT_BRIDGE') {
+            md += `## Entity Details\n- **Name:** ${entityName}\n- **Wallet:** \`${entityAddress}\`\n- **Jurisdiction:** ${jurisdiction}\n`;
+            if (type === 'FIAT_BRIDGE') md += `- **License:** ${bridgeLicense}\n`;
+        }
+        else if (['FUNDING', 'PROJECT_FUNDING', 'FAST_TRACK'].includes(type)) {
+            md += `## Funding Request\n- **Total Budget:** ${budget} TRS\n- **Executor:** \`${executor}\`\n`;
+
+            // Template Specifics
+            if (template === 'AGRI') {
+                md += `\n### Regenerative Agri Framework\n- **Country:** ${agriCountry}\n- **Duration:** ${agriDuration} months\n- **Model:** ${agriFundingModel}\n`;
+            } else if (template === 'SME') {
+                md += `\n### SME Growth Framework\n- **Company:** ${smeName}\n- **Status:** ${smeLegalStatus}\n- **Model:** ${smeFundingModel}\n- **Equity/Repayment:** ${smeFundingModel === 'Equity' ? smeEquity + '%' : smeRepayment}\n`;
+            } else if (template === 'RESEARCH') {
+                md += `\n### Research Grant\n- **Institution:** ${resInst}\n- **Area:** ${resArea}\n- **IP Policy:** ${resIp}\n`;
+            } else if (template === 'INFRA') {
+                md += `\n### Infrastructure Project\n- **Type:** ${infraType}\n- **Maintenance:** ${infraMaint}\n`;
+            }
+
+            md += `\n## Milestones\n`;
             milestones.forEach((m) => md += `1. **${m.desc}**: ${m.amount} TRS\n`);
-        } else if (type === 'OPPORTUNITY') {
+        }
+        else if (type === 'OPPORTUNITY') {
             md += `## Market Intelligence\n- **Market Size:** ${oppMarket}\n- **Region:** ${oppRegion}\n- **Contact:** ${oppContact}\n`;
         }
+        else if (type === 'LEGAL_STRUCTURE') {
+            md += `## Legal Entity Definition\n- **Proposed Name:** ${legalName}\n- **Form:** ${legalType}\n- **Jurisdiction:** ${legalJurisdiction}\n- **Governance:** ${legalGov}\n- **Op. Agreement Hash:** \`${legalOpAgreement || 'N/A'}\`\n- **Facilitator:** ${legalFacilitator}\n- **Setup Cap:** ${legalBudget} TRS\n`;
+        }
+        else if (type === 'LEGAL_SETUP_FUNDING') {
+            md += `## Legal Setup Costs\n`;
+            expenseBreakdown.forEach(e => md += `- **${e.category}**: ${e.desc} (${e.amount} TRS)\n`);
+        }
+        else if (type === 'EXECUTION_POD') {
+            md += `## Execution Pod Config\n- **Pod Name:** ${podName}\n- **Mandate:** ${podMandate}\n- **Treasury Cap:** ${podCap} TRS\n- **Initial Admin:** \`${podAdmin}\`\n- **Voting Model:** ${podThreshold}\n`;
+        }
+
         md += `\n\n---\n**Declaration**: Confirmed via Thrive Realms Protocol.`;
         return md;
     };
@@ -246,18 +143,23 @@ function NewProposalContent() {
             const description = generateMarkdown();
             let targets: string[] = [], values: number[] = [], calldatas: string[] = [];
 
+            // GENERIC PROPOSAL LOGIC (For enhanced types, we rely on the Markdown Description as the Spec)
+            // Ideally we would have specific contracts for PodRegistry etc.
+            // For now, we use a NULL call to the Governance Settings or similar to record it on-chain.
+
             if (type === 'ENTITY') {
                 const regInterface = new ethers.Interface(CONTRACT_ABIS.ExecutionRegistry);
                 const data = regInterface.encodeFunctionData("registerEntity", [entityAddress, 1, entityName, jurisdiction, entityUrl]);
                 targets = [CONTRACT_ADDRESSES.EXECUTION_REGISTRY];
                 values = [0];
                 calldatas = [data];
-            } else if (type === 'FUNDING' || type === 'PROJECT_FUNDING') {
+            } else if (['FUNDING', 'PROJECT_FUNDING', 'FAST_TRACK'].includes(type) && milestones.length > 0) {
+                // ... (Existing Milestone Logic) ...
                 let totalBudget = BigInt(0);
                 const milestoneAmounts: BigInt[] = [];
                 const milestoneDescs: string[] = [];
                 milestones.forEach(m => {
-                    const amtWei = ethers.parseEther(m.amount);
+                    const amtWei = ethers.parseEther(m.amount || '0');
                     totalBudget += amtWei;
                     milestoneAmounts.push(amtWei);
                     milestoneDescs.push(m.desc);
@@ -270,14 +172,13 @@ function NewProposalContent() {
                 targets = [CONTRACT_ADDRESSES.TOKEN, CONTRACT_ADDRESSES.PROJECT_FACTORY];
                 values = [0, 0];
                 calldatas = [approveData, createData];
-            } else if (type === 'OPPORTUNITY') {
-                const vaultInterface = new ethers.Interface(CONTRACT_ABIS.OpportunityRegistry);
-                const data = vaultInterface.encodeFunctionData("submitOpportunity", [title, oppRegion || "Global", "N/A", oppContact, "ipfs://placeholder"]); // Fixed naming
-                targets = [CONTRACT_ADDRESSES.OPPORTUNITY_REGISTRY];
+            } else {
+                // For Legal/Pod types without a specific contract call yet:
+                // We make a dummy call to GovernanceSettings to log the proposal
+                targets = [CONTRACT_ADDRESSES.GOVERNANCE_SETTINGS];
                 values = [0];
-                calldatas = [data];
+                calldatas = ["0x"]; // Empty call
             }
-            // Add other types as needed (simplified for this fix)
 
             const tx = await gov.propose(targets, values, calldatas, description);
             await tx.wait();
@@ -331,7 +232,7 @@ function NewProposalContent() {
                 </div>
             )}
 
-            {/* STEP 2: DETAILS (Same as before) */}
+            {/* STEP 2: DETAILS */}
             {step === 2 && (
                 <div className="animate-fadeIn space-y-6">
                     <h2 className="text-2xl font-bold text-white">Proposal Details</h2>
@@ -382,10 +283,114 @@ function NewProposalContent() {
 
                     {/* FUNDING FIELDS (Standard, Fast Track, Project) */}
                     {(type === 'FUNDING' || type === 'PROJECT_FUNDING' || type === 'FAST_TRACK') && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <h3 className="text-lg font-bold text-green-400">
-                                {type === 'FAST_TRACK' ? 'Fast Track Funding Request' : 'Funding Request'}
+                                {searchParams.get('template') ? `${searchParams.get('template')} Framework` : (type === 'FAST_TRACK' ? 'Fast Track Funding' : 'Funding Request')}
                             </h3>
+
+                            {/* --- TEMPLATE SPECIFIC FIELDS --- */}
+
+                            {/* AGRI TEMPLATE */}
+                            {searchParams.get('template') === 'AGRI' && (
+                                <div className="p-4 bg-green-900/20 border border-green-500/30 rounded grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 text-sm text-green-200 mb-2 font-bold flex items-center gap-2"><Globe size={16} /> Regenerative Agriculture Specs</div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Country</label>
+                                        <input value={agriCountry} onChange={e => setAgriCountry(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="e.g. Kenya" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Project Duration (Months)</label>
+                                        <input type="number" value={agriDuration} onChange={e => setAgriDuration(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Funding Model</label>
+                                        <select value={agriFundingModel} onChange={e => setAgriFundingModel(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Loan</option>
+                                            <option>Revenue Share</option>
+                                            <option>Hybrid</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* SME TEMPLATE */}
+                            {searchParams.get('template') === 'SME' && (
+                                <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 text-sm text-blue-200 mb-2 font-bold flex items-center gap-2"><Briefcase size={16} /> SME Growth Specs</div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Company Name</label>
+                                        <input value={smeName} onChange={e => setSmeName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Legal Status</label>
+                                        <select value={smeLegalStatus} onChange={e => setSmeLegalStatus(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Registered Entity</option>
+                                            <option>Unregistered / Informal</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Funding Model</label>
+                                        <select value={smeFundingModel} onChange={e => setSmeFundingModel(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Loan</option>
+                                            <option>Equity</option>
+                                        </select>
+                                    </div>
+                                    {smeFundingModel === 'Equity' ? (
+                                        <div>
+                                            <label className="block text-sm text-gray-400 mb-1">Equity Offered (%)</label>
+                                            <input type="number" value={smeEquity} onChange={e => setSmeEquity(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <label className="block text-sm text-gray-400 mb-1">Repayment Terms</label>
+                                            <input value={smeRepayment} onChange={e => setSmeRepayment(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="e.g. 5% Interest, 12mo" />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* RESEARCH TEMPLATE */}
+                            {searchParams.get('template') === 'RESEARCH' && (
+                                <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 text-sm text-purple-200 mb-2 font-bold flex items-center gap-2"><Building2 size={16} /> Research Grant Specs</div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Institution Name</label>
+                                        <input value={resInst} onChange={e => setResInst(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Research Area</label>
+                                        <input value={resArea} onChange={e => setResArea(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-sm text-gray-400 mb-1">IP Policy</label>
+                                        <select value={resIp} onChange={e => setResIp(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Open Source (CC-BY)</option>
+                                            <option>DAO Owned IP</option>
+                                            <option>Shared / Hybrid</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* INFRA TEMPLATE */}
+                            {searchParams.get('template') === 'INFRA' && (
+                                <div className="p-4 bg-orange-900/20 border border-orange-500/30 rounded grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 text-sm text-orange-200 mb-2 font-bold flex items-center gap-2"><Users size={16} /> Infrastructure Specs</div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Asset Type</label>
+                                        <select value={infraType} onChange={e => setInfraType(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                            <option>Physical (Grid/Roads)</option>
+                                            <option>Digital (Servers/Code)</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-sm text-gray-400 mb-1">Maintenance Plan</label>
+                                        <textarea value={infraMaint} onChange={e => setInfraMaint(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white h-20" placeholder="Who maintains this asset?" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* STANDARD FIELDS */}
                             {type === 'FAST_TRACK' && (
                                 <div className="p-4 bg-orange-900/20 border border-orange-500/50 rounded flex items-center gap-3">
                                     <ShieldCheck className="text-orange-500" />
@@ -439,15 +444,13 @@ function NewProposalContent() {
                     {type === 'LEGAL_STRUCTURE' && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-bold text-yellow-400">Legal Entity Definition</h3>
+                            <div className="p-4 bg-yellow-900/10 border border-yellow-500/30 rounded mb-4 text-sm text-yellow-200">
+                                This proposal establishes a legally binding entity for the DAO. All details will be hashed and recorded on-chain.
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Legal Form</label>
-                                    <select value={legalType} onChange={e => setLegalType(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
-                                        <option>DAO-Controlled LLC</option>
-                                        <option>Swiss Association</option>
-                                        <option>UNA (Unincorporated Nonprofit)</option>
-                                        <option>Cayman Foundation</option>
-                                    </select>
+                                    <label className="block text-sm text-gray-400 mb-1">Proposed Entity Name</label>
+                                    <input value={legalName} onChange={e => setLegalName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="e.g. Thrive Realms LLC" />
                                 </div>
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Jurisdiction</label>
@@ -461,8 +464,27 @@ function NewProposalContent() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Facilitator / Law Firm</label>
-                                    <input value={legalFacilitator} onChange={e => setLegalFacilitator(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="Legal Partner Name" />
+                                    <label className="block text-sm text-gray-400 mb-1">Legal Form</label>
+                                    <select value={legalType} onChange={e => setLegalType(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option>DAO-Controlled LLC</option>
+                                        <option>Swiss Association</option>
+                                        <option>UNA (Unincorporated Nonprofit)</option>
+                                        <option>Cayman Foundation</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Governance Model</label>
+                                    <select value={legalGov} onChange={e => setLegalGov(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option>Token Voting (Optimistic)</option>
+                                        <option>Multisig Veto</option>
+                                        <option>Trustee Managed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Operating Agreement (IPFS Hash)</label>
+                                    <input value={legalOpAgreement} onChange={e => setLegalOpAgreement(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" placeholder="Qm..." />
                                 </div>
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Setup Budget Cap (TRS)</label>
@@ -497,6 +519,19 @@ function NewProposalContent() {
                     {type === 'EXECUTION_POD' && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-bold text-pink-400">Execution Pod Configuration</h3>
+                            <div className="p-4 bg-pink-900/10 border border-pink-500/30 rounded mb-4 text-sm text-pink-200">
+                                Spin up a new sub-DAO (Pod) with specific mandate, budget, and voting rules.
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Pod Name</label>
+                                    <input value={podName} onChange={e => setPodName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" placeholder="e.g. Agri-Finance Pod" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Initial Admin Wallet</label>
+                                    <input value={podAdmin} onChange={e => setPodAdmin(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" />
+                                </div>
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Pod Mandate Type</label>
@@ -507,9 +542,17 @@ function NewProposalContent() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Pod Treasury Cap (TRS)</label>
-                                    <input type="number" value={podCap} onChange={e => setPodCap(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
+                                    <label className="block text-sm text-gray-400 mb-1">Voting Model</label>
+                                    <select value={podThreshold} onChange={e => setPodThreshold(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white">
+                                        <option>3/5 Multisig</option>
+                                        <option>Simple Majority (Token)</option>
+                                        <option>Single Admin (Limited)</option>
+                                    </select>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Pod Treasury Cap (TRS)</label>
+                                <input type="number" value={podCap} onChange={e => setPodCap(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
                             </div>
                         </div>
                     )}
