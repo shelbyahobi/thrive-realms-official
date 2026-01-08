@@ -28,8 +28,13 @@ export default function ExecutorDirectory() {
 
             // Query "EntityVerified" events from the beginning
             // Note: In production, consider range limits. For MVP, query from block 0.
+            // Query "EntityVerified" events
+            // Fix: Public RPCs time out on full history queries.
+            // Search last 50,000 blocks (approx 1.5 days) which covers the deployment.
+            const latestBlock = await provider.getBlockNumber();
+            const fromBlock = Math.max(0, latestBlock - 50000);
             const filter = registry.filters.EntityVerified();
-            const events = await registry.queryFilter(filter);
+            const events = await registry.queryFilter(filter, fromBlock, latestBlock);
 
             // Map addresses to current profiles
             // We use a Set to get unique addresses

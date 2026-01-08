@@ -57,20 +57,60 @@ export default function ProjectDetails() {
         window.location.href = `/proposals/new?type=milestone&escrow=${address}&index=${index}&amount=${amount}`;
     }
 
-    async function depositDividend() {
-        // Implementation for depositing dividends
+    const [reporting, setReporting] = useState(false);
+    const [reportText, setReportText] = useState("");
+
+    async function submitReport() {
         if (!signer) return;
-        const amount = prompt("Enter Amount of TRS/BNB to deposit as Dividend:");
-        if (!amount) return;
-        // Logic to approve and call DividendVault.deposit()
-        alert("Feature coming soon: Dividend Deposit Integration");
+        try {
+            const escrow = new ethers.Contract(address as string, CONTRACT_ABIS.ProjectEscrow, signer);
+            // For MVP, we attach report to the *next* unpaid milestone or just index 0 if generic?
+            // Contract requires (index, uri). We should find the first unpaid milestone.
+            const nextMilestoneIndex = project.milestones.findIndex((m: any) => !m.released);
+
+            if (nextMilestoneIndex === -1) {
+                alert("All milestones completed!");
+                return;
+            }
+
+            // In real app, upload text to IPFS. Here, we use text as URI for MVP.
+            const tx = await escrow.submitReport(nextMilestoneIndex, reportText);
+            await tx.wait();
+            alert("Report Submitted Successfully!");
+            setReporting(false);
+            fetchDetails();
+        } catch (e: any) {
+            console.error(e);
+            alert("Report Failed: " + (e.reason || e.message));
+        }
     }
 
-    if (loading) return <div className="p-12 text-center"><Loader2 className="animate-spin mx-auto text-purple-500" /></div>;
-    if (!project) return <div className="p-12 text-center">Project Not Found</div>;
+    async function depositDividend() {
+        if (!signer) return;
+        const amount = prompt("Enter Amount of TRS to deposit as Dividend:");
+        if (!amount) return;
+        try {
+            const token = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, CONTRACT_ABIS.TRSToken, signer);
+            const vault = new ethers.Contract(CONTRACT_ADDRESSES.DIVIDEND_VAULT, CONTRACT_ABIS.DividendVault, signer);
+            const amtWei = ethers.parseEther(amount);
+
+            // Approve
+            const txApprove = await token.approve(CONTRACT_ADDRESSES.DIVIDEND_VAULT, amtWei);
+            await txApprove.wait();
+
+            // Deposit
+            const tx = await vault.deposit(amtWei);
+            await tx.wait();
+            alert("Dividends Distributed Successfully!");
+        } catch (e: any) {
+            console.error(e);
+            alert("Deposit Failed: " + (e.reason || e.message));
+        }
+    }
 
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
+            {/* Header & Stats - Keep Existing Structure */}
             <div className="mb-8">
                 <span className="text-sm text-blue-400 font-bold uppercase tracking-wider">{project.category}</span>
                 <h1 className="text-4xl font-bold text-white mb-2">{project.title}</h1>
@@ -118,19 +158,41 @@ export default function ProjectDetails() {
                 ))}
             </div>
 
-            <div className="mt-12 pt-8 border-t border-white/10 flex justify-between items-center">
-                <div>
-                    <h3 className="font-bold text-white">Project Management</h3>
-                    <p className="text-xs text-gray-500">Actions for Founder & Executor</p>
+            {/* ACTION CENTER */}
+            <div className="mt-12 pt-8 border-t border-white/10">
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 className="font-bold text-white">Cockpit Actions</h3>
+                        <p className="text-xs text-gray-500">Manage execution, reporting, and revenue.</p>
+                    </div>
+                    <div className="flex gap-4">
+                        {!reporting && (
+                            <button onClick={() => setReporting(true)} className="btn btn-secondary flex items-center gap-2">
+                                <Send size={18} /> Submit Report
+                            </button>
+                        )}
+                        <button onClick={depositDividend} className="btn bg-green-600 hover:bg-green-500 text-white flex items-center gap-2">
+                            <DollarSign size={18} /> Deposit Dividends
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-4">
-                    <button className="btn btn-secondary flex items-center gap-2">
-                        <Send size={18} /> Update Status
-                    </button>
-                    <button onClick={depositDividend} className="btn bg-green-600 hover:bg-green-500 text-white flex items-center gap-2">
-                        <DollarSign size={18} /> Deposit Dividends
-                    </button>
-                </div>
+
+                {/* REPORTING FORM */}
+                {reporting && (
+                    <div className="bg-white/5 p-6 rounded-xl border border-white/10 animate-in fade-in slide-in-from-top-2">
+                        <label className="block text-sm text-gray-400 mb-2">Progress Report content (IPFS Hash or Text)</label>
+                        <textarea
+                            value={reportText}
+                            onChange={e => setReportText(e.target.value)}
+                            className="w-full bg-black/50 border border-white/10 rounded p-4 text-white min-h-[100px] mb-4"
+                            placeholder="Describe progress, metrics achieved, and proof of work..."
+                        />
+                        <div className="flex gap-4">
+                            <button onClick={submitReport} className="btn btn-primary bg-purple-600 text-white">Submit Report to Chain</button>
+                            <button onClick={() => setReporting(false)} className="btn text-gray-400 hover:text-white">Cancel</button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

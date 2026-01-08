@@ -184,7 +184,7 @@ function ExecutorDashboardContent() {
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="text-purple-400 font-bold">{parseInt(p.budget).toLocaleString()} TRS</div>
-                                                    <Link href={`/dashboard`} className="text-xs text-white hover:underline opacity-60">Manage in Dashboard</Link>
+                                                    <Link href={`/projects/${p.address}`} className="text-xs text-white hover:underline opacity-60">Manage in Cockpit</Link>
                                                 </div>
                                             </div>
                                         ))}
