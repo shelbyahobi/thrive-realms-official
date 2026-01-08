@@ -164,7 +164,8 @@ export default function ProposalDetailPage() {
         try {
             const gov = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, signer);
             const descHash = ethers.id(proposal.description);
-            const tx = await gov.queue(proposal.targets, proposal.values, proposal.calldatas, descHash);
+            // Fix: Spread immutable proxy arrays to mutable JS arrays
+            const tx = await gov.queue([...proposal.targets], [...proposal.values], [...proposal.calldatas], descHash);
             await tx.wait();
             alert("Proposal Queued!");
             fetchProposalDetails();
@@ -181,7 +182,8 @@ export default function ProposalDetailPage() {
         try {
             const gov = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, signer);
             const descHash = ethers.id(proposal.description);
-            const tx = await gov.execute(proposal.targets, proposal.values, proposal.calldatas, descHash);
+            // Fix: Spread immutable proxy arrays to mutable JS arrays
+            const tx = await gov.execute([...proposal.targets], [...proposal.values], [...proposal.calldatas], descHash);
             await tx.wait();
             alert("Proposal Executed! Actions have been triggered.");
             fetchProposalDetails();

@@ -163,9 +163,9 @@ async function main() {
 
     // 14. Transfer Remaining Supply to Timelock (Treasury)
     // The rest (900M) goes to the secure Treasury
-    // We keep 1000 TRS for the Deployer to ensure we have some voting power for emergency proposals
+    // We keep 100,000 TRS for the Deployer to ensure we have voting power and can seed test users
     const remainingSupply = await token.balanceOf(deployer.address);
-    const keepAmount = hre.ethers.parseEther("1000");
+    const keepAmount = hre.ethers.parseEther("100000");
 
     if (remainingSupply > keepAmount) {
         const sendAmount = remainingSupply - keepAmount;
