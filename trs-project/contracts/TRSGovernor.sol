@@ -73,8 +73,8 @@ contract TRSGovernor is Governor, GovernorSettings, GovernorCountingSimple, Gove
         override(Governor, GovernorSettings)
         returns (uint256)
     {
-        // 24,000 TRS required to propose (Founders Tier)
-        return 24000 * 10**18;
+        // Use the dynamic setting from Constructor/Storage (GovernorSettings)
+        return super.proposalThreshold();
     }
 
     function propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description)
@@ -82,7 +82,6 @@ contract TRSGovernor is Governor, GovernorSettings, GovernorCountingSimple, Gove
         override(Governor, IGovernor)
         returns (uint256)
     {
-        // Permissionless (Tier-based only, enforced by proposalThreshold)
         return super.propose(targets, values, calldatas, description);
     }
 
@@ -91,9 +90,10 @@ contract TRSGovernor is Governor, GovernorSettings, GovernorCountingSimple, Gove
         override(Governor)
         returns (uint256)
     {
-        uint256 snapshot = proposalSnapshot(proposalId);
-        uint256 votes = token.getPastVotes(account, snapshot);
-        require(votes >= 12000 * 10**18, "Must have Voter Tier (12k TRS)");
+        // REMOVED FOR TESTNET:
+        // uint256 snapshot = proposalSnapshot(proposalId);
+        // uint256 votes = token.getPastVotes(account, snapshot);
+        // require(votes >= 12000 * 10**18, "Must have Voter Tier (12k TRS)");
 
         return super._castVote(proposalId, account, support, reason, params);
     }

@@ -34,16 +34,25 @@ async function main() {
     // 3. Deploy Governor
     // Params: token, timelock, delay (1 block), period (5 mins/20 blocks), threshold (0), quorum (4%)
     const Governor = await hre.ethers.getContractFactory("TRSGovernor");
+    // TESTNET PARAMS:
+    // Delay: 1 block (Fast start)
+    // Period: 600 blocks (~30 mins) - Enough to test but doesn't wait forever
+    // Threshold: 100 TRS (Low barrier for testing)
+    // Quorum: 0% (Allows passing with just 1 vote if 0 is supported, otherwise 1%)
+    // Note: Quorum Fraction 0 might revert in some OZ versions, trying 1% (1).
+    const governanceThreshold = hre.ethers.parseEther("100"); // 100 TRS
+
+    // Re-instantiating with Quorum 0:
     const governor = await Governor.deploy(
         token.target,
         timelock.target,
-        200,    // 200 blocks delay (~10 mins) - Safer for snapshots
-        28800,  // 28800 blocks period (~24 hours) - Human friendly duration
-        0,      // 0 threshold
-        4       // 4% quorum
+        1, // delay
+        600, // period
+        governanceThreshold,
+        0 // 0% Quorum
     );
     await governor.waitForDeployment();
-    console.log("TRSGovernor deployed to:", governor.target);
+    console.log("TRSGovernor (Testnet Mode) deployed to:", governor.target);
 
     // 4. Create Sale
     const Sale = await hre.ethers.getContractFactory("TRSSale");
