@@ -137,7 +137,7 @@ export default function ProposalDetailPage() {
                 abstainVotes: formatEther(votes[2]),
                 targets: args[2],
                 values: args[3],
-                calldatas: args[4],
+                calldatas: args[5], // Fix: Index 5 is calldatas, Index 4 is signatures
                 snapshot: Number(snapshot)
             });
 
