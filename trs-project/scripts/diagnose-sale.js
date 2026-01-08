@@ -33,17 +33,20 @@ async function main() {
     console.log("Sale Contract Balance:      ", hre.ethers.formatEther(saleBal), "TRS");
 
     // 3. Check Allowance
-    // Sale needs allowance from Treasury to move funds (transferFrom)
-    const allowance = await token.allowance(TIMELOCK_ADDR, SALE_ADDR);
-    console.log("\n--- Allowances ---");
-    console.log("Allowance (Timelock -> Sale):", hre.ethers.formatEther(allowance), "TRS");
-
-    if (allowance === 0n) {
-        console.error("\nCRITICAL ISSUE: The Sale contract has 0 allowance from the Treasury.");
-        console.error("The 'buyTokens' function uses transferFrom(treasury, buyer).");
-        console.error("It will FAIL until the Treasury approves the Sale contract.");
+    // 3. Check Funding (Direct Funding Model)
+    // Sale needs to HOLD tokens to sell them (transfer(msg.sender, amount))
+    if (saleBal === 0n) {
+        console.error("\nCRITICAL ISSUE: The Sale contract has 0 TRS Balance.");
+        console.error("The 'buyTokens' function uses transfer(msg.sender, amount).");
+        console.error("You MUST fund the Sale contract directly from the Treasury.");
     } else {
-        console.log("\nAllowance looks OK.");
+        console.log("\nFunding looks OK. Sale contract has tokens.");
+    }
+
+    // Allowance check is NOT needed for this model, but we check if it exists just in case
+    const allowance = await token.allowance(TIMELOCK_ADDR, SALE_ADDR);
+    if (allowance > 0n) {
+        console.log("Note: Treasury has also approved Sale contract (Allowance: " + hre.ethers.formatEther(allowance) + "), but this model uses Direct Balance.");
     }
 }
 

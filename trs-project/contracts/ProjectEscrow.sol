@@ -3,11 +3,12 @@ pragma solidity ^0.8.20;
 
 import "./ReputationRegistry.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract ProjectEscrow is Ownable, Pausable {
+contract ProjectEscrow is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     struct Milestone {
@@ -77,7 +78,7 @@ contract ProjectEscrow is Ownable, Pausable {
         transferOwnership(_owner);
     }
 
-    function submitReport(uint256 index, string memory _reportURI) external onlyExecutor whenNotPaused {
+    function submitReport(uint256 index, string memory _reportURI) external onlyExecutor whenNotPaused nonReentrant {
         require(index < milestones.length, "Invalid index");
         Milestone storage m = milestones[index];
         require(!m.paid, "Already paid");
@@ -91,7 +92,7 @@ contract ProjectEscrow is Ownable, Pausable {
         emit ReportSubmitted(index, _reportURI);
     }
 
-    function releaseMilestone(uint256 index) external onlyOwner whenNotPaused {
+    function releaseMilestone(uint256 index) external onlyOwner whenNotPaused nonReentrant {
         require(index < milestones.length, "Invalid index");
         Milestone storage m = milestones[index];
         require(!m.paid, "Already paid");

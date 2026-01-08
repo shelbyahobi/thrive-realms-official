@@ -51,11 +51,37 @@ async function main() {
     await sale.waitForDeployment();
     console.log("TRSSale deployed to:", sale.target);
 
-    // 5. Deploy Registry
+    // 5. Deploy ExecutionRegistry
     const Registry = await hre.ethers.getContractFactory("ExecutionRegistry");
     const registry = await Registry.deploy();
     await registry.waitForDeployment();
     console.log("ExecutionRegistry deployed to:", registry.target);
+
+    // 5b. Deploy PolicyRegistry (Required by Factory)
+    const PolicyRegistry = await hre.ethers.getContractFactory("PolicyRegistry");
+    const policyRegistry = await PolicyRegistry.deploy();
+    await policyRegistry.waitForDeployment();
+    console.log("PolicyRegistry deployed to:", policyRegistry.target);
+
+    // 5c. Deploy ReputationRegistry (Required by Factory & Escrow)
+    const ReputationRegistry = await hre.ethers.getContractFactory("ReputationRegistry");
+    const reputationRegistry = await ReputationRegistry.deploy();
+    await reputationRegistry.waitForDeployment();
+    console.log("ReputationRegistry deployed to:", reputationRegistry.target);
+
+    // 5d. Deploy ProjectFactory
+    const ProjectFactory = await hre.ethers.getContractFactory("ProjectFactory");
+    const factory = await ProjectFactory.deploy(
+        registry.target,
+        policyRegistry.target,
+        reputationRegistry.target
+    );
+    await factory.waitForDeployment();
+    console.log("ProjectFactory deployed to:", factory.target);
+
+    // Grant Factory ability to authorize new projects in ReputationRegistry
+    await (await reputationRegistry.grantAutomationRole(factory.target)).wait();
+    console.log("Granted Factory automation role in ReputationRegistry");
 
     // 6. Deploy Dividend Vault (Treasury/Staking)
     const DividendVault = await hre.ethers.getContractFactory("DividendVault");
@@ -71,18 +97,22 @@ async function main() {
     console.log("FounderSplitter deployed to:", founderSplitter.target);
 
     // 8. Deploy Seed Project Escrow (Proof of Concept)
-    // Args: id, title, cat, country, region, executor, token, owner, amounts, descs
+    // Args: id, title, cat, country, region, executor, token, owner, repRegistry, amounts, descs
     const Escrow = await hre.ethers.getContractFactory("ProjectEscrow");
     const seedEscrow = await Escrow.deploy(
         "SEED_001", "Genesis Project", "Agri-Tech", "Nigeria", "Lagos",
         deployer.address, // executor (deployer for now)
         token.target,
         deployer.address, // owner
-        [hre.ethers.parseEther("100")], // 1 milestone of 100 TRS
+        reputationRegistry.target, // ReputationRegistry added
+        [hre.ethers.parseEther("100")],
         ["Genesis Milestone"]
     );
     await seedEscrow.waitForDeployment();
     console.log("ProjectEscrow (Seed) deployed to:", seedEscrow.target);
+
+    // Authorize Seed Escrow manually since it wasn't created by Factory
+    await (await reputationRegistry.grantAutomationRole(seedEscrow.target)).wait();
 
     // 9. Setup Roles & Transfers (Existing logic shifted down)
     const PROPOSER_ROLE = await timelock.PROPOSER_ROLE();
@@ -124,11 +154,30 @@ async function main() {
 
     // 14. Transfer Remaining Supply to Timelock (Treasury)
     // The rest (900M) goes to the secure Treasury
+    // We keep 1000 TRS for the Deployer to ensure we have some voting power for emergency proposals
     const remainingSupply = await token.balanceOf(deployer.address);
-    if (remainingSupply > 0) {
-        await (await token.transfer(timelock.target, remainingSupply)).wait();
-        console.log(`Transferred remaining ${hre.ethers.formatEther(remainingSupply)} TRS to Timelock`);
+    const keepAmount = hre.ethers.parseEther("1000");
+
+    if (remainingSupply > keepAmount) {
+        const sendAmount = remainingSupply - keepAmount;
+        await (await token.transfer(timelock.target, sendAmount)).wait();
+        console.log(`Transferred ${hre.ethers.formatEther(sendAmount)} TRS to Timelock (Kept 1000 for Operations)`);
+    } else {
+        console.log("Deployer balance too low to transfer remaining to Timelock");
     }
+
+    // 16. Transfer Ownerships to Timelock (Final Decentralization Step)
+    console.log("\nTransferring Ownerships to Timelock...");
+    await (await token.transferOwnership(timelock.target)).wait();
+    await (await sale.transferOwnership(timelock.target)).wait();
+    await (await registry.transferOwnership(timelock.target)).wait(); // ExecutionRegistry
+    // Factory and ReputationRegistry should also be owned by Timelock? Yes.
+    // ProjectFactory is immutable and not Ownable, so skipping ownership transfer.
+    // await (await factory.transferOwnership(timelock.target)).wait(); 
+    await (await reputationRegistry.transferOwnership(timelock.target)).wait(); // Reputation
+    await (await policyRegistry.transferOwnership(timelock.target)).wait(); // Policy
+
+    console.log("CRITICAL: Token, Sale, and Registry Ownership transferred to Timelock.");
 
     // 15. Check Timelock Balance
     // console.log("Timelock Balance:", await token.balanceOf(timelock.target));
@@ -141,6 +190,9 @@ async function main() {
         GOVERNOR: governor.target,
         SALE: sale.target,
         REGISTRY: registry.target,
+        FACTORY: factory.target,
+        REPUTATION: reputationRegistry.target,
+        POLICY: policyRegistry.target,
         VAULT: vault.target,
         DIVIDEND: dividendVault.target,
         SPLITTER: founderSplitter.target,

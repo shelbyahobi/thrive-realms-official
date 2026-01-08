@@ -29,12 +29,15 @@ contract TRSSale is ReentrancyGuard, Ownable {
     function getCurrentPrice() public view returns (uint256) {
         if (saleEnded) return MAX_PRICE; 
         if (!saleStarted) return INITIAL_PRICE;
+        
+        // Safety check to prevent underflow if timestamp is manipulated by miners slightly
+        if (block.timestamp < saleStartTime) return INITIAL_PRICE;
 
         uint256 timeElapsed = block.timestamp - saleStartTime;
         uint256 intervals = timeElapsed / DOUBLING_PERIOD;
         
-        // Safety check for overflow if intervals is huge (unlikely within reasonable time)
-        if (intervals > 20) return MAX_PRICE; // 2^20 is massive multiplier
+        // Cap intervals to prevent overflow (though Solidity 0.8+ is safe) and massive gas
+        if (intervals > 20) intervals = 20;
 
         uint256 currentPrice = INITIAL_PRICE * (2 ** intervals);
 

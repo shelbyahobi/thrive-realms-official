@@ -41,6 +41,7 @@ function NewProposalContent() {
     const [entityAddress, setEntityAddress] = useState('');
     const [entityUrl, setEntityUrl] = useState('');
     const [jurisdiction, setJurisdiction] = useState('');
+    const [bridgeLicense, setBridgeLicense] = useState('');
 
     // Type B: Funding
     const [budget, setBudget] = useState('');
@@ -59,6 +60,7 @@ function NewProposalContent() {
     const [legalControl, setLegalControl] = useState('Multisig');
     const [legalBudget, setLegalBudget] = useState('');
     const [legalFacilitator, setLegalFacilitator] = useState('');
+    const [expenseBreakdown, setExpenseBreakdown] = useState<{ category: string, desc: string, amount: string }[]>([{ category: 'Filing', desc: '', amount: '' }]);
 
     // LEGAL & POD ENHANCED STATE
     const [legalName, setLegalName] = useState('');
@@ -67,6 +69,8 @@ function NewProposalContent() {
     const [podName, setPodName] = useState('');
     const [podAdmin, setPodAdmin] = useState('');
     const [podThreshold, setPodThreshold] = useState('3/5 Multisig');
+    const [podMandate, setPodMandate] = useState('Geographic (Regional)');
+    const [podCap, setPodCap] = useState('');
 
     // TEMPLATE SPECIFIC STATE
     // Agri
@@ -91,6 +95,72 @@ function NewProposalContent() {
     const [infraMaint, setInfraMaint] = useState('');
 
     const template = searchParams.get('template');
+
+    const typeConfig: Record<ProposalType, { title: string, desc: string, icon: any, activeClasses: string, textClass: string }> = {
+        'ENTITY': {
+            title: 'Execution Partner',
+            desc: 'Register as a verified partner to execute projects.',
+            icon: <Briefcase size={32} />,
+            activeClasses: 'bg-blue-900/40 border-blue-500 ring-1 ring-blue-500',
+            textClass: 'text-blue-400'
+        },
+        'FUNDING': {
+            title: 'Funding Request',
+            desc: 'Request Treasury funds for a specific project or initiative.',
+            icon: <DollarSign size={32} />,
+            activeClasses: 'bg-green-900/40 border-green-500 ring-1 ring-green-500',
+            textClass: 'text-green-400'
+        },
+        'OPPORTUNITY': {
+            title: 'Market Intelligence',
+            desc: 'Submit valuable market data or opportunities (No immediate funding).',
+            icon: <Globe size={32} />,
+            activeClasses: 'bg-purple-900/40 border-purple-500 ring-1 ring-purple-500',
+            textClass: 'text-purple-400'
+        },
+        'FAST_TRACK': {
+            title: 'Fast Track (Tier 3)',
+            desc: 'Expedited funding for high-reputation partners (Automated).',
+            icon: <ShieldCheck size={32} />,
+            activeClasses: 'bg-orange-900/40 border-orange-500 ring-1 ring-orange-500',
+            textClass: 'text-orange-400'
+        },
+        'FIAT_BRIDGE': {
+            title: 'Fiat Gateway',
+            desc: 'Register as a licensed Fiat-to-Crypto bridge provider.',
+            icon: <Banknote size={32} />,
+            activeClasses: 'bg-emerald-900/40 border-emerald-500 ring-1 ring-emerald-500',
+            textClass: 'text-emerald-400'
+        },
+        'EXECUTION_POD': {
+            title: 'Execution Pod',
+            desc: 'Spin up a semi-autonomous sub-DAO with its own treasury.',
+            icon: <Users size={32} />,
+            activeClasses: 'bg-pink-900/40 border-pink-500 ring-1 ring-pink-500',
+            textClass: 'text-pink-400'
+        },
+        'LEGAL_STRUCTURE': {
+            title: 'Legal Entity',
+            desc: 'Propose a new legal wrapper for the DAO.',
+            icon: <Scale size={32} />,
+            activeClasses: 'bg-yellow-900/40 border-yellow-500 ring-1 ring-yellow-500',
+            textClass: 'text-yellow-400'
+        },
+        'LEGAL_SETUP_FUNDING': {
+            title: 'Legal Setup Funding',
+            desc: 'Request funds specifically for legal formation costs.',
+            icon: <Scale size={32} />,
+            activeClasses: 'bg-cyan-900/40 border-cyan-500 ring-1 ring-cyan-500',
+            textClass: 'text-cyan-400'
+        },
+        'PROJECT_FUNDING': {
+            title: 'Project Funding',
+            desc: 'Standard project funding request.',
+            icon: <DollarSign size={32} />,
+            activeClasses: 'bg-green-900/40 border-green-500 ring-1 ring-green-500',
+            textClass: 'text-green-400'
+        }
+    };
 
     const generateMarkdown = () => {
         const date = new Date().toISOString().split('T')[0];
@@ -135,7 +205,9 @@ function NewProposalContent() {
         return md;
     };
 
-    const submitProposal = async () => {
+    const handleNext = () => setStep(s => s + 1);
+
+    const handleSubmit = async () => {
         if (!signer) return;
         setLoading(true);
         try {
