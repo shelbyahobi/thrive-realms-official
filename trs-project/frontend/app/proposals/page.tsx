@@ -6,7 +6,19 @@ import { useWallet } from '../../hooks/useWallet';
 import Link from 'next/link';
 import { Plus, Loader2, AlertTriangle } from 'lucide-react'; // Added AlertTriangle
 
-// ... Proposal Interface ...
+interface Proposal {
+    id: string;
+    proposer: string;
+    description: string;
+    state: number;
+    forVotes: string;
+    againstVotes: string;
+    abstainVotes: string;
+}
+
+const ProposalState = [
+    "Pending", "Active", "Canceled", "Defeated", "Succeeded", "Queued", "Expired", "Executed"
+];
 
 export default function ProposalsPage() {
     const { provider, signer, account } = useWallet();
@@ -109,7 +121,7 @@ export default function ProposalsPage() {
                     <h1 className="text-3xl font-bold text-white">Governance Proposals</h1>
                     <p className="text-gray-400">Vote on the future of the ecosystem.</p>
                 </div>
-                <Link href="/proposals/new" className="btn btn-primary flex items-center gap-2">
+                <Link href="/governance/create" className="btn btn-primary flex items-center gap-2">
                     <Plus size={18} /> New Proposal
                 </Link>
             </div>
