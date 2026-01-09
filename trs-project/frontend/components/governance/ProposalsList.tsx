@@ -173,7 +173,7 @@ export default function ProposalsList() {
                         <button onClick={() => setFilter('mandates')} className={`px-3 py-1.5 rounded ${filter === 'mandates' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}>Mandates</button>
                         <button onClick={() => setFilter('approvals')} className={`px-3 py-1.5 rounded ${filter === 'approvals' ? 'bg-yellow-600 text-black' : 'text-gray-400 hover:text-white'}`}>Approvals</button>
                     </div>
-                    <Link href="/proposals/new" className="btn btn-primary flex items-center gap-2">
+                    <Link href="/governance/create" className="btn btn-primary flex items-center gap-2">
                         <Plus size={18} /> New Proposal
                     </Link>
                 </div>
