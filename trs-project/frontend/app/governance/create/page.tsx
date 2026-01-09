@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, DollarSign, Scale, ChevronRight } from 'lucide-react';
-import WalletGuard from '../../components/layout/WalletGuard';
+import WalletGuard from '../../../components/layout/WalletGuard';
 
 export default function CreateGovernancePage() {
     return (
