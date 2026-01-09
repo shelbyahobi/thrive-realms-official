@@ -209,6 +209,22 @@ function NewProposalContent() {
 
     const handleSubmit = async () => {
         if (!signer) return;
+
+        // Validation
+        if (!title) { alert("Title is required"); return; }
+        if (!summary) { alert("Summary is required"); return; }
+
+        if (type === 'ENTITY') {
+            if (!entityName) { alert("Entity Name is required"); return; }
+            if (!entityAddress) { alert("Entity Address is required"); return; }
+            if (!jurisdiction) { alert("Jurisdiction is required"); return; }
+        }
+
+        if (['FUNDING', 'PROJECT_FUNDING'].includes(type)) {
+            if (!budget) { alert("Budget is required"); return; }
+            if (!executor) { alert("Executor Address is required"); return; }
+        }
+
         setLoading(true);
         try {
             const gov = new ethers.Contract(CONTRACT_ADDRESSES.GOVERNOR, CONTRACT_ABIS.TRSGovernor, signer);
@@ -287,19 +303,27 @@ function NewProposalContent() {
                 <div className="animate-fadeIn">
                     <h2 className="text-2xl font-bold text-white mb-6">Select Proposal Type</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {(Object.keys(typeConfig) as ProposalType[]).map((t) => (
-                            <button key={t} onClick={() => { setType(t); handleNext(); }}
-                                className={`p-6 rounded-xl border transition text-left group relative overflow-hidden 
+                        {(Object.keys(typeConfig) as ProposalType[])
+                            .filter(t => {
+                                const p = searchParams.get('pillar');
+                                if (p === 'EXECUTION') return ['ENTITY', 'FIAT_BRIDGE', 'EXECUTION_POD'].includes(t);
+                                if (p === 'CAPITAL') return ['FUNDING', 'PROJECT_FUNDING', 'FAST_TRACK', 'OPPORTUNITY'].includes(t);
+                                if (p === 'LAW') return ['LEGAL_STRUCTURE', 'LEGAL_SETUP_FUNDING'].includes(t);
+                                return true; // Show all if no pillar
+                            })
+                            .map((t) => (
+                                <button key={t} onClick={() => { setType(t); handleNext(); }}
+                                    className={`p-6 rounded-xl border transition text-left group relative overflow-hidden 
                                     ${type === t
-                                        ? typeConfig[t].activeClasses
-                                        : 'bg-white/5 border-white/10 hover:border-purple-500'
-                                    }`}
-                            >
-                                <div className={`${typeConfig[t].textClass} mb-4`}>{typeConfig[t].icon}</div>
-                                <h3 className="text-xl font-bold text-white mb-2">{typeConfig[t].title}</h3>
-                                <p className="text-sm text-gray-400">{typeConfig[t].desc}</p>
-                            </button>
-                        ))}
+                                            ? typeConfig[t].activeClasses
+                                            : 'bg-white/5 border-white/10 hover:border-purple-500'
+                                        }`}
+                                >
+                                    <div className={`${typeConfig[t].textClass} mb-4`}>{typeConfig[t].icon}</div>
+                                    <h3 className="text-xl font-bold text-white mb-2">{typeConfig[t].title}</h3>
+                                    <p className="text-sm text-gray-400">{typeConfig[t].desc}</p>
+                                </button>
+                            ))}
                     </div>
                 </div>
             )}
@@ -310,11 +334,11 @@ function NewProposalContent() {
                     <h2 className="text-2xl font-bold text-white">Proposal Details</h2>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm text-gray-400 mb-1">Title</label>
+                            <label className="block text-sm text-gray-400 mb-1">Title <span className="text-red-500">*</span></label>
                             <input value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
                         </div>
                         <div>
-                            <label className="block text-sm text-gray-400 mb-1">Summary</label>
+                            <label className="block text-sm text-gray-400 mb-1">Summary <span className="text-red-500">*</span></label>
                             <textarea value={summary} onChange={e => setSummary(e.target.value)} className="w-full h-32 bg-black/50 border border-white/10 rounded p-3 text-white" />
                         </div>
                     </div>
@@ -329,11 +353,11 @@ function NewProposalContent() {
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Entity Name</label>
+                                    <label className="block text-sm text-gray-400 mb-1">Entity Name <span className="text-red-500">*</span></label>
                                     <input value={entityName} onChange={e => setEntityName(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Wallet Address</label>
+                                    <label className="block text-sm text-gray-400 mb-1">Wallet Address <span className="text-red-500">*</span></label>
                                     <input value={entityAddress} onChange={e => setEntityAddress(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded p-3 text-white font-mono" />
                                 </div>
                             </div>
